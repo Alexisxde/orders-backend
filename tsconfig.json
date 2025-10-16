@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"target": "ES2016",
+		"baseUrl": "./src",
+		"module": "CommonJS",
+		"moduleResolution": "node",
+		"paths": { "@/*": ["*"] },
+		"outDir": "./build",
+		"rootDir": "./",
+		"sourceMap": true,
+		"esModuleInterop": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"strict": true,
+		"forceConsistentCasingInFileNames": true,
+		"noFallthroughCasesInSwitch": true,
+		"skipLibCheck": true
+	},
+	"include": ["src/**/*"],
+	"exclude": ["node_modules", "build"]
+}
