@@ -5,7 +5,9 @@ const envSchema = z.object({
 	DATABASE_AUTH_TOKEN: z.string(),
 	DATABASE_URL: z.string().url(),
 	NODE_ENV: z.string().default("development"),
-	API_URL: z.string().default("http://localhost:3000")
+	API_URL: z.string().default("http://localhost:3000"),
+	JWT_SECRET_REFRESHTOKEN: z.string(),
+	JWT_SECRET: z.string()
 })
 
 const { error, success, data } = envSchema.safeParse(process.env)
@@ -22,4 +24,4 @@ declare global {
 	}
 }
 
-export const { PORT, DATABASE_AUTH_TOKEN, DATABASE_URL, API_URL, NODE_ENV } = data
+export const { PORT, DATABASE_AUTH_TOKEN, DATABASE_URL, API_URL, NODE_ENV, JWT_SECRET_REFRESHTOKEN, JWT_SECRET } = data

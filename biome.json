@@ -21,9 +21,8 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true,
-			"suspicious": {
-				"noConsole": "error"
-			}
+			"suspicious": { "noConsole": "error" },
+			"complexity": { "noBannedTypes": "off" }
 		}
 	},
 	"javascript": {

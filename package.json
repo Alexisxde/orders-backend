@@ -7,6 +7,7 @@
 		"start": "node build/src/index.js",
 		"dev": "ts-node-dev src/index.ts",
 		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
 		"format": "biome format --write",
 		"lint": "biome lint --write",
 		"check": "biome check"
@@ -17,19 +18,25 @@
 	"description": "",
 	"dependencies": {
 		"@libsql/client": "0.15.0",
+		"bcrypt": "^6.0.0",
 		"cloudinary": "2.5.1",
+		"cookie-parser": "^1.4.7",
 		"cors": "2.8.5",
 		"dotenv": "16.4.7",
 		"drizzle-orm": "0.40.1",
 		"express": "4.21.2",
+		"jsonwebtoken": "^9.0.2",
 		"morgan": "1.10.1",
 		"multer": "2.0.2",
 		"zod": "3.23.8"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.6",
+		"@types/bcrypt": "^6.0.0",
+		"@types/cookie-parser": "^1.4.9",
 		"@types/cors": "2.8.17",
 		"@types/express": "5.0.1",
+		"@types/jsonwebtoken": "^9.0.10",
 		"@types/morgan": "1.9.10",
 		"@types/multer": "2.0.0",
 		"@types/node": "22.10.1",

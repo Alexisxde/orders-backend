@@ -1,10 +1,13 @@
 import { sql } from "drizzle-orm"
 import { sqliteTable, text } from "drizzle-orm/sqlite-core"
 
-export const ImagesTable = sqliteTable("images", {
-	image_id: text("image_id").primaryKey().notNull(),
-	url: text("url").notNull().unique(),
-	email: text("email").notNull(),
-	format: text("format").notNull(),
-	created_at: text("created_at").default(sql`(CURRENT_TIMESTAMP)`)
+export const UserTable = sqliteTable("users", {
+	_id: text("_id").primaryKey().notNull(),
+	name: text("name").notNull().unique(),
+	email: text("email").notNull().unique(),
+	password: text("password").notNull(),
+	role: text("role", { enum: ["admin", "user"] })
+		.notNull()
+		.default("user"),
+	created_at: text("created_at").default(sql`(CURRENT_TIMESTAMP)`).notNull()
 })
