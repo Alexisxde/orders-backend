@@ -11,6 +11,7 @@ const envSchema = z.object({
 const { error, success, data } = envSchema.safeParse(process.env)
 
 if (!success) {
+	// biome-ignore lint/suspicious/noConsole: Permitido para verificar las variables en el servidor.
 	console.error("❌ Error en las variables de entorno: ", error.format())
 	process.exit(1)
 }
