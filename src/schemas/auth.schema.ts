@@ -14,3 +14,13 @@ export const userCreateSchema = z.object({
 		.refine((val) => /\d/.test(val), { message: "Debe contener al menos un número." })
 		.refine((val) => /^[a-zA-Z\d]+$/.test(val), { message: "Solo se permiten letras y números." })
 })
+
+export const userLoginSchema = z.object({
+	email: z
+		.string({ required_error: "El email es obligatorio.", invalid_type_error: "El email debe ser un texto." })
+		.email({ message: "Debe ser un email válido." }),
+	password: z.string({
+		required_error: "La contraseña es obligatoria.",
+		invalid_type_error: "La contraseña debe ser un texto."
+	})
+})
