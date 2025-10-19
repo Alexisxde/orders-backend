@@ -1,12 +1,12 @@
 import { Router } from "express"
-import { registerUser } from "../controllers/auth.controller"
+import { getCurrentUser, loginUser, logoutUser, refresh, registerUser } from "../controllers/auth.controller"
 
 const router = Router()
 
 router.post("/register", registerUser)
-// router.post("/login", loginAdmin)
-// router.post("/logout", logoutAdmin)
-// router.post("/refresh", refresh)
-// router.get("/me", getCurrentAdmin)
+router.post("/login", loginUser)
+router.post("/logout", logoutUser)
+router.post("/refresh", refresh)
+router.get("/user", getCurrentUser)
 
 export default router
