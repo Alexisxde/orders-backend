@@ -13,14 +13,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: List files
-        run: ls -la
-      
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
           run_install: false
 
+      - name: List files
+        run: ls -la
+        
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
