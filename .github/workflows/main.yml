@@ -20,16 +20,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install PNPM
-        run: npm install -g pnpm
+          cache: 'npm'
 
       - name: Install dependencies
-        run: pnpm install
+        run: npm install
 
       - name: Run formatter
-        run: pnpm format
+        run: npm run format
 
       - name: Run linter
-        run: pnpm lint
+        run: npm run lint
