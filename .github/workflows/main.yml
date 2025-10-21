@@ -28,13 +28,13 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
+          
+      - name: Enable/Install pnpm with Corepack
+        run: corepack enable && corepack prepare pnpm@8 --activate
 
-      - name: Install pnpm
-        run: npm install -g pnpm@8
-        
       - name: Instalando dependencias
         run: pnpm i
-        
+
       - name: Ejecutando el formateador.
         run: pnpm format
 
