@@ -1,42 +1,46 @@
-name: Format and Lint on Main
+name: Lint y Format Check
 
 on:
   push:
-    branches: ["main", "dev"]
+    branches: [ "main", "dev" ]
+  
   pull_request:
-    branches: ["main", "dev"]
+    branches: [ "main", "dev" ]
 
-permissions: 
-  contents: write
-  pages: write
-  id-token: write
+# Cancela ejecuciones anteriores en la misma rama/PR para ahorrar recursos
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build: 
+  lint-and-format:
+    name: Checkeo de Lint y Formato
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [20]
-
     steps:
-      - name: Checkout repository
+      # Obtener el código del repositorio
+      - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ matrix.node-version }} with pnpm cache
+      # Configurar pnpm
+      - name: Configurar pnpm
+        uses: pnpm/action-setup@v3
+
+      # Configurar Node.js 20 y la caché de pnpm
+      - name: Configurar Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 20
           cache: "pnpm"
-          
-      - name: Enable/Install pnpm with Corepack
-        run: corepack enable && corepack prepare pnpm@8 --activate
 
-      - name: Instalando dependencias
-        run: pnpm i
+      # Instalar dependencias
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
 
-      - name: Ejecutando el formateador.
-        run: pnpm format
-
-      - name: Ejecutando el linter.
+      # Ejecutar Lint
+      - name: Ejecutar Lint
         run: pnpm lint
+
+      # Verificar formato
+      - name: Verificar formato
+        run: pnpm format
