@@ -70,15 +70,13 @@ export const logoutUser = async (_: Request, res: Response) => {
 		res.clearCookie("token", {
 			httpOnly: true,
 			secure: NODE_ENV === "production",
-			sameSite: "lax",
-			maxAge: 6 * 60 * 60 * 1000
+			sameSite: "lax"
 		})
 
 		res.clearCookie("refreshToken", {
 			httpOnly: true,
 			secure: NODE_ENV === "production",
-			sameSite: "lax",
-			maxAge: 7 * 24 * 60 * 60 * 1000
+			sameSite: "lax"
 		})
 
 		res.status(200).json({ success: true, message: "Logout exitoso", error: null })
