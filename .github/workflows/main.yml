@@ -2,36 +2,37 @@ name: Format and Lint on Main
 
 on:
   push:
-    branches:
-      - main
+    branches: ["main", "dev"]
   pull_request:
-    branches:
-      - main
+    branches: ["main", "dev"]
 
 jobs:
-  format-and-lint:
+  build: 
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          run_install: false
-
-      - name: List files
-        run: ls -la
+    strategy:
+      matrix:
+        node-version: [20]
+        pnpm-version: [8]
         
-      - name: Setup Node.js
+
+    steps:
+      - name: Setup pnpm ${{ matrix.pnpm-version }}
+        uses: pnpm/setup-node@v2
+        with:
+          version: ${{ matrix.pnpm-version }}
+
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
+      
+      - name: Instalando dependencias
+        run: pnpm i
 
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Run formatter
+      - name: Ejecutando el formateador.
         run: pnpm format
 
-      - name: Run linter
+      - name: Ejecutando el linter.
         run: pnpm lint
