@@ -10,7 +10,7 @@ export type UserRole = User["role"]
 
 export type UserToken = Omit<User, "password" | "created_at">
 
-export interface UserCreate {
+export interface UserCreate  {
 	name: UserName
 	email: UserEmail
 	password: UserPassword
