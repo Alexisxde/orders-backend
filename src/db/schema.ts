@@ -28,7 +28,7 @@ export const ClientsTable = table(
 		update_at: t.text("update_at"),
 		user_id: t.text("user_id").references(() => UserTable._id)
 	},
-	(table) => [t.index("name_idx").on(table.name)]
+	(table) => [t.index("name_clients_idx").on(table.name)]
 )
 
 // delivered: "Entregado"
@@ -55,7 +55,7 @@ export const OrdersTable = table(
 		created_at: t.text("created_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
 		client_id: t.text("client_id").references(() => ClientsTable._id)
 	},
-	(table) => [t.index("status_idx").on(table.status), t.index("payment_method_idx").on(table.payment_method)]
+	(table) => [t.index("status_orders_idx").on(table.status), t.index("payment_method_idx").on(table.payment_method)]
 )
 
 export const OrdersDetailsTable = table(
@@ -80,7 +80,7 @@ export const ProductsTable = table(
 		description: t.text("description"),
 		image_id: t.text("image_id").references(() => ImagesTable._id)
 	},
-	(table) => [t.index("name_idx").on(table.name)]
+	(table) => [t.index("name_products_idx").on(table.name)]
 )
 
 export const ImagesTable = table(
@@ -89,7 +89,26 @@ export const ImagesTable = table(
 		_id: t.text("_id").primaryKey().notNull(),
 		name: t.text("name").notNull(),
 		url: t.text("url").notNull(),
-		description: t.text("description")
+		description: t.text("description"),
+		user_id: t.text("user_id").references(() => UserTable._id)
 	},
-	(table) => [t.index("name_idx").on(table.name)]
+	(table) => [t.index("name_images_idx").on(table.name)]
 )
+
+// kg: "Kilogramos",
+// g: "Gramos",
+// l: "Litros",
+// ml: "Mililitros",
+// units: "Unidades"
+// export const StockTable = table(
+// 	"stock",
+// 	{
+// 		_id: t.text("_id").primaryKey().notNull(),
+// 		name: t.text("name").notNull(),
+// 		quantity: t.numeric("quantity").notNull(),
+// 		unit: t.text("unit", { enum: ["kg", "g", "l", "ml", "units"] }).notNull(),
+// 		observation: t.text("observation"),
+// 		updated_at: t.text("updated_at").default(sql`(CURRENT_TIMESTAMP)`).notNull()
+// 	},
+// 	(table) => [t.index("name_idx").on(table.name), t.index("unit_idx").on(table.unit)]
+// )
