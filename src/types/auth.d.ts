@@ -8,15 +8,6 @@ export type UserEmail = User["email"]
 export type UserPassword = User["password"]
 export type UserRole = User["role"]
 
+export type UserCreate = Pick<User, "name" | "email" | "password">
+export type UserLogin = Pick<User, "email" | "password">
 export type UserToken = Omit<User, "password" | "created_at">
-
-export interface UserCreate  {
-	name: UserName
-	email: UserEmail
-	password: UserPassword
-}
-
-export interface UserLogin {
-	email: UserEmail
-	password: UserPassword
-}
