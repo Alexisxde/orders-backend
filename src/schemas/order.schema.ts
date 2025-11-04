@@ -5,9 +5,21 @@ export const orderCreateSchema = z.object({
 	name: z.string({ required_error: "El nombre es obligatorio.", invalid_type_error: "Debe ser un texto." }),
 	phone: z.string().nullable().optional(),
 	payment_method: z.enum(orderPaymentMethodValues, { errorMap: () => ({ message: "Metodo de pago invalido." }) }),
-	status: z.enum(orderStatusValues, { errorMap: () => ({ message: "Estado invalido." }) }),
-	total: z.string({ required_error: "El total es obligatorio.", invalid_type_error: "Debe ser un texto." }),
-	user_id: z.string({ required_error: "El ID de usuario es obligatorio.", invalid_type_error: "Debe ser un texto." })
+	orders: z
+		.array(
+			z.object({
+				product_id: z.string({
+					required_error: "El ID del producto es obligatorio.",
+					invalid_type_error: "Debe ser un texto."
+				}),
+				quantity: z
+					.number({ required_error: "La cantidad es obligatoria.", invalid_type_error: "Debe ser un número." })
+					.int()
+					.positive(),
+				observation: z.string().optional()
+			})
+		)
+		.min(1, { message: "Debe haber al menos un producto en la orden." })
 })
 
 export const orderSelectSchema = z

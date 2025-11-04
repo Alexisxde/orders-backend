@@ -41,8 +41,8 @@ export const OrdersDetailsTable = table(
 	"orders_details",
 	{
 		_id: t.text("_id").primaryKey().notNull(),
-		quality: t.numeric("quality").notNull(),
-		unit_price: t.numeric("unit_price").notNull(),
+		quantity: t.numeric("quantity").notNull(),
+		price: t.numeric("price").notNull(),
 		observation: t.text("observation"),
 		order_id: t.text("order_id").references(() => OrdersTable._id),
 		product_id: t.text("product_id").references(() => ProductsTable._id)
