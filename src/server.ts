@@ -2,11 +2,15 @@ import cookieParser from "cookie-parser"
 import cors from "cors"
 import express, { json } from "express"
 import morgan from "morgan"
+import { createServer } from "node:http"
+import { Server } from "socket.io"
 import "./config"
 
-const server = express()
+const app = express()
+const server = createServer(app)
+const io = new Server(server, { cors: { origin: ["http://localhost:3000", "http://localhost:4000"] } })
 
-server.use([
+app.use([
 	json(),
 	cors({
 		origin: ["http://localhost:3000", "http://localhost:4000"],
@@ -17,4 +21,4 @@ server.use([
 	cookieParser()
 ])
 
-export default server
+export { app, io, server }

@@ -1,62 +1,41 @@
 import { sql } from "drizzle-orm"
 import * as t from "drizzle-orm/sqlite-core"
 import { sqliteTable as table } from "drizzle-orm/sqlite-core"
+import { userRoleValues } from "../types/auth"
+import { orderPaymentMethodValues, orderStatusValues } from "../types/order"
 
 export const UserTable = table(
 	"users",
 	{
 		_id: t.text("_id").primaryKey().notNull(),
-		name: t.text("name").notNull().unique(),
+		name: t.text("name").notNull(),
 		email: t.text("email").notNull().unique(),
 		password: t.text("password").notNull(),
-		role: t
-			.text("role", { enum: ["admin", "user"] })
-			.notNull()
-			.default("user"),
-		created_at: t.text("created_at").default(sql`(CURRENT_TIMESTAMP)`).notNull()
+		role: t.text("role", { enum: userRoleValues }).notNull().default("user"),
+		created_at: t.text("created_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+		id_avatar: t.text("id_avatar").references(() => ImagesTable._id)
 	},
 	(table) => [t.uniqueIndex("email_idx").on(table.email)]
 )
 
-export const ClientsTable = table(
-	"clients",
-	{
-		_id: t.text("_id").primaryKey().notNull(),
-		name: t.text("name").notNull().unique(),
-		phone: t.text("phone").notNull(),
-		created_at: t.text("created_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
-		update_at: t.text("update_at"),
-		user_id: t.text("user_id").references(() => UserTable._id)
-	},
-	(table) => [t.index("name_clients_idx").on(table.name)]
-)
+export type UserTableType = typeof UserTable.$inferInsert
 
-// delivered: "Entregado"
-// to_ship: "Listo para enviar",
-// pickup: "Listo para recoger",
-// on_hold: "En espera",
-// deleted: "Eliminado"
-// cancelled: "Cancelado"
-
-// cash: "Efectivo",
-// card: "Tarjeta",
-// transfer: "Transferencia",
-// mercado_pago: "Mercado Pago",
-// qr: "Código QR"
 export const OrdersTable = table(
 	"orders",
 	{
 		_id: t.text("_id").primaryKey().notNull(),
-		payment_method: t.text("payment_method", { enum: ["cash", "card", "transfer", "mercado_pago", "qr"] }).notNull(),
-		status: t
-			.text("status", { enum: ["delivered", "to_ship", "pickup", "on_hold", "deleted", "cancelled"] })
-			.default("on_hold"),
+		payment_method: t.text("payment_method", { enum: orderPaymentMethodValues }).notNull(),
+		status: t.text("status", { enum: orderStatusValues }).default("on_hold"),
+		name: t.text("name").notNull(),
+		phone: t.text("phone"),
 		total: t.numeric("total").notNull(),
 		created_at: t.text("created_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
-		client_id: t.text("client_id").references(() => ClientsTable._id)
+		user_id: t.text("user_id").references(() => UserTable._id)
 	},
 	(table) => [t.index("status_orders_idx").on(table.status), t.index("payment_method_idx").on(table.payment_method)]
 )
+
+export type OrdersTableType = typeof OrdersTable.$inferInsert
 
 export const OrdersDetailsTable = table(
 	"orders_details",
@@ -71,29 +50,42 @@ export const OrdersDetailsTable = table(
 	(table) => [t.index("order_idx").on(table.order_id)]
 )
 
+export type OrdersDetailsTableType = typeof OrdersDetailsTable.$inferInsert
+
 export const ProductsTable = table(
 	"products",
 	{
 		_id: t.text("_id").primaryKey().notNull(),
 		name: t.text("name").notNull(),
-		price: t.numeric("unit_price").notNull(),
+		unit_price: t.numeric("unit_price").notNull(),
 		description: t.text("description"),
-		image_id: t.text("image_id").references(() => ImagesTable._id)
+		created_at: t.text("created_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+		image_id: t.text("image_id").references(() => UserImagesTable._id),
+		user_id: t.text("user_id").references(() => UserTable._id)
 	},
 	(table) => [t.index("name_products_idx").on(table.name)]
 )
 
-export const ImagesTable = table(
-	"images",
+export type ProductsTableType = typeof ProductsTable.$inferInsert
+
+export const UserImagesTable = table(
+	"user_images",
 	{
 		_id: t.text("_id").primaryKey().notNull(),
-		name: t.text("name").notNull(),
-		url: t.text("url").notNull(),
-		description: t.text("description"),
+		image_id: t.text("image_id").references(() => ImagesTable._id),
 		user_id: t.text("user_id").references(() => UserTable._id)
 	},
-	(table) => [t.index("name_images_idx").on(table.name)]
+	(table) => [t.index("user_id_idx").on(table.user_id)]
 )
+
+export type UserImagesTableType = typeof UserImagesTable.$inferInsert
+
+export const ImagesTable = table("images", {
+	_id: t.text("_id").primaryKey().notNull(),
+	url: t.text("url").notNull()
+})
+
+export type ImagesTableType = typeof ImagesTable.$inferInsert
 
 // kg: "Kilogramos",
 // g: "Gramos",

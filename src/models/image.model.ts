@@ -1,18 +1,28 @@
 import { eq } from "drizzle-orm"
 import db from "../db/db"
-import { ImagesTable } from "../db/schema"
+import { ImagesTable, UserImagesTable } from "../db/schema"
 import type { ImageCreate } from "../types/image"
 
-export async function insertImage({ id, name, url, user_id }: ImageCreate) {
+export async function insertImage({ id, url, user_id }: ImageCreate) {
+	const _id = crypto.randomUUID()
+
 	try {
-		const result = await db.insert(ImagesTable).values({ _id: id, name, url, user_id })
-		return result.rows
+		const result = await db.insert(ImagesTable).values({ _id: id, url }).returning()
+		await db.insert(UserImagesTable).values({ _id, image_id: id, user_id })
+		return result
 	} catch (_) {}
 }
 
-export async function getImages(id: string) {
+export async function getImages(user_id: string) {
 	try {
-		const result = await db.select().from(ImagesTable).where(eq(ImagesTable.user_id, id))
+		const result = await db
+			.select({
+				imageId: UserImagesTable.image_id,
+				imageUrl: ImagesTable.url
+			})
+			.from(UserImagesTable)
+			.where(eq(UserImagesTable.user_id, user_id))
+			.leftJoin(ImagesTable, eq(ImagesTable._id, UserImagesTable.image_id))
 		return result
 	} catch (_) {}
 }

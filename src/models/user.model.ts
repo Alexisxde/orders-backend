@@ -11,8 +11,8 @@ export const createUser = async ({ name, email, password }: UserCreate) => {
 	const _id = crypto.randomUUID()
 	try {
 		const hashedPassword = (await bcrypt.hash(password, SALT)) as string
-		const result = await db.insert(UserTable).values({ _id, name, email, password: hashedPassword })
-		return result.rows
+		const result = await db.insert(UserTable).values({ _id, name, email, password: hashedPassword }).returning()
+		return result[0]
 	} catch (_) {}
 }
 

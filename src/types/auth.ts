@@ -1,12 +1,14 @@
 import type { InferModel } from "drizzle-orm"
-import type { UserTable } from "./../db/schema"
+import type { UserTable } from "../db/schema"
+
+export const userRoleValues = ["admin", "user"] as const
 
 export type User = InferModel<typeof UserTable>
 export type UserId = User["_id"]
 export type UserName = User["name"]
 export type UserEmail = User["email"]
 export type UserPassword = User["password"]
-export type UserRole = User["role"]
+export type UserRole = (typeof userRoleValues)[number]
 
 export type UserCreate = Pick<User, "name" | "email" | "password">
 export type UserLogin = Pick<User, "email" | "password">

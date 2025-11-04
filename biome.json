@@ -38,6 +38,8 @@
 	},
 	"assist": {
 		"enabled": true,
-		"actions": { "source": { "organizeImports": "on" } }
+		"actions": {
+			"source": { "recommended": true, "organizeImports": "off", "useSortedProperties": "on" }
+		}
 	}
 }
