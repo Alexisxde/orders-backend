@@ -3,8 +3,8 @@ import { getProduct, getProducts, insertProduct } from "../models/product.model"
 import { productCreateSchema } from "../schemas/product.schema"
 
 export async function createProduct(req: Request, res: Response) {
-	if (!req.body.user) return res.status(404).json({ success: false, error: "Ocurrió un error inesperado." })
-	const { _id: user_id } = req.body.user
+	if (!req.user) return res.status(401).json({ error: "Unauthorized" })
+	const { _id: user_id } = req.user
 	const { success, error, data } = productCreateSchema.safeParse(req.body)
 
 	if (!success)
@@ -21,8 +21,8 @@ export async function createProduct(req: Request, res: Response) {
 }
 
 export async function selectProducts(req: Request, res: Response) {
-	if (!req.body.user) return res.status(404).json({ success: false, error: "Ocurrió un error inesperado." })
-	const { _id: user_id } = req.body.user
+	if (!req.user) return res.status(401).json({ error: "Unauthorized" })
+	const { _id: user_id } = req.user
 
 	try {
 		const data = await getProducts(user_id)

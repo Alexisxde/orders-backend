@@ -1,10 +1,10 @@
 import type { Request, Response } from "express"
-import { insertOrder } from "../models/order.model"
+import { insertOrder, selectOrders } from "../models/order.model"
 import { orderCreateSchema } from "../schemas/order.schema"
 
 export async function createOrder(req: Request, res: Response) {
-	if (!req.body.user) return res.status(404).json({ success: false, error: "Ocurrió un error inesperado." })
-	const { _id: user_id } = req.body.user
+	if (!req.user) return res.status(401).json({ error: "Unauthorized" })
+	const { _id: user_id } = req.user
 	const { success, error, data } = orderCreateSchema.safeParse(req.body)
 
 	if (!success)
@@ -18,4 +18,15 @@ export async function createOrder(req: Request, res: Response) {
 	} catch (_) {
 		return []
 	}
+}
+
+export async function getOrders(req: Request, res: Response) {
+	if (!req.user) return res.status(401).json({ error: "Unauthorized" })
+	const { _id: user_id } = req.user
+	const { page } = req.query as { page?: string }
+
+	try {
+		const data = await selectOrders({ user_id })
+		res.status(200).json({ success: true, data: [], error: null })
+	} catch (_) {}
 }

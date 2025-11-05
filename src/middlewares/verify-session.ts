@@ -14,7 +14,7 @@ export const verifySession = (req: Request<{}, {}, { user?: UserToken }>, res: R
 
 	try {
 		const decoded = jwt.verify(token, JWT_SECRET) as UserToken
-		req.body.user = decoded
+		req.user = decoded
 		return next()
 	} catch (_) {
 		refresh(req, res)
