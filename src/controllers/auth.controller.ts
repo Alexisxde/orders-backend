@@ -3,8 +3,8 @@ import type { Request, Response } from "express"
 import jwt from "jsonwebtoken"
 import { JWT_SECRET, JWT_SECRET_REFRESHTOKEN, NODE_ENV } from "../config"
 import { createUser, getUserByEmail, UserById } from "../models/user.model"
-import { userCreateSchema, userLoginSchema } from "../schemas/auth.schema"
-import type { User, UserCreate, UserLogin } from "../types/auth"
+import { userCreateSchema } from "../schemas/auth.schema"
+import type { UserCreate, UserJWT, UserLogin } from "../types/auth"
 
 export async function registerUser(req: Request<unknown, unknown, UserCreate>, res: Response) {
 	const { success, error, data } = userCreateSchema.safeParse(req.body)
@@ -27,23 +27,17 @@ export async function registerUser(req: Request<unknown, unknown, UserCreate>, r
 }
 
 export async function loginUser(req: Request<unknown, unknown, UserLogin>, res: Response) {
-	const { success, error, data } = userLoginSchema.safeParse(req.body)
-
-	if (!success)
-		return res.status(400).json({ errors: error.errors.map((err) => ({ field: err.path[0], message: err.message })) })
-
-	const { email, password } = data
+	const { email, password } = req.body
 	const user = await getUserByEmail(email)
+	if (!user) return res.status(404).json({ error: "Usuario no encontrado. Por favor intentelo de nuevo." })
 
 	try {
-		if (!user) return res.status(404).json({ error: "Usuario no encontrado. Por favor intentelo de nuevo." })
-
 		const isValid = await bcrypt.compare(password, user.password)
 		if (!isValid) return res.status(404).json({ error: "Las credenciales proporcionadas no son válidas." })
 
-		const { _id, name, email, role } = user
-		const token = jwt.sign({ _id, name, email, role }, JWT_SECRET, { expiresIn: "8h" })
-		const refreshToken = jwt.sign({ _id, name, email, role }, JWT_SECRET_REFRESHTOKEN, { expiresIn: "7d" })
+		const { _id, role } = user
+		const token = jwt.sign({ _id, role }, JWT_SECRET, { expiresIn: "8h" })
+		const refreshToken = jwt.sign({ _id, role }, JWT_SECRET_REFRESHTOKEN, { expiresIn: "7d" })
 
 		res.cookie("token", token, {
 			httpOnly: true,
@@ -90,7 +84,7 @@ export async function getCurrentUser(req: Request, res: Response) {
 	if (!token) return res.status(401).json({ success: false, error: "No hay token." })
 
 	try {
-		const decoded = jwt.verify(token, JWT_SECRET) as Omit<User, "password" | "created_at">
+		const decoded = jwt.verify(token, JWT_SECRET) as UserJWT
 		const user = await UserById(decoded._id)
 		if (!user) return res.status(404).json({ success: false, error: "Usuario no encontrado." })
 		const { password: _, ...data } = user
@@ -106,7 +100,7 @@ export async function refresh(req: Request, res: Response) {
 	if (!refreshToken) return res.status(401).json({ success: false, error: "No hay refresh token." })
 
 	try {
-		const decoded = jwt.verify(refreshToken, JWT_SECRET_REFRESHTOKEN) as Omit<User, "password" | "created_at">
+		const decoded = jwt.verify(refreshToken, JWT_SECRET_REFRESHTOKEN) as UserJWT
 		const newToken = jwt.sign(decoded, JWT_SECRET, { expiresIn: "8h" })
 
 		res.cookie("token", newToken, {

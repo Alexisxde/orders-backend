@@ -4,8 +4,8 @@ import { uploadSchema } from "../schemas/image.schema"
 import cloudinary from "../services/cloudinary"
 
 export async function getAllImages(req: Request, res: Response) {
-	if (!req.user) return res.status(401).json({ error: "Unauthorized" })
-	const { _id: user_id } = req.user
+	if (!req.body.user) return res.status(401).json({ error: "Unauthorized" })
+	const { _id: user_id } = req.body.user
 
 	try {
 		const data = await getImages(user_id)
@@ -14,8 +14,8 @@ export async function getAllImages(req: Request, res: Response) {
 }
 
 export async function postImage(req: Request, res: Response) {
-	if (!req.user) return res.status(401).json({ error: "Unauthorized" })
-	const { _id: user_id } = req.user
+	if (!req.body.user) return res.status(401).json({ error: "Unauthorized" })
+	const { _id: user_id } = req.body.user
 	const errors: { field: string; message: string }[] = []
 	const { success, error } = uploadSchema.safeParse(req.body)
 

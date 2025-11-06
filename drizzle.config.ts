@@ -1,11 +1,14 @@
 import { defineConfig } from "drizzle-kit"
-import { DATABASE_AUTH_TOKEN, DATABASE_URL } from "./src/config"
+import { DATABASE_URL, NODE_ENV } from "./src/config"
 
 export default defineConfig({
-	dialect: "turso",
+	dialect: NODE_ENV === "production" ? "turso" : "sqlite",
 	schema: "./src/db/schema.ts",
-	out: "./src/db/migrations",
-	dbCredentials: { url: DATABASE_URL, authToken: DATABASE_AUTH_TOKEN },
+	out: "./migrations",
+	dbCredentials: {
+		url: DATABASE_URL
+		// authToken: DATABASE_AUTH_TOKEN
+	},
 	verbose: true,
 	strict: true
 })

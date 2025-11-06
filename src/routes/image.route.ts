@@ -5,7 +5,7 @@ import { verifySession } from "../middlewares/verify-session"
 
 const router = express.Router()
 
-router.get("/", getAllImages)
+router.get("/", verifySession, getAllImages)
 router.post("/upload", upload.single("image"), verifySession, postImage)
 
 export default router

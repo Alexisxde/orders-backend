@@ -1,13 +1,14 @@
 import { Router } from "express"
-import { getCurrentUser, loginUser, logoutUser, refresh, registerUser } from "../controllers/auth.controller"
+import { getCurrentUser, loginUser, logoutUser, registerUser } from "../controllers/auth.controller"
+import { schemaBodyValidator } from "../middlewares/schema-validator"
 import { verifySession } from "../middlewares/verify-session"
+import { userLoginSchema } from "../schemas/auth.schema"
 
 const router = Router()
 
 router.post("/register", registerUser)
-router.post("/login", loginUser)
+router.post("/login", schemaBodyValidator(userLoginSchema), loginUser)
 router.post("/logout", logoutUser)
-router.post("/refresh", refresh)
 router.get("/user", verifySession, getCurrentUser)
 
 export default router

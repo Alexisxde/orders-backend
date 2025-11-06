@@ -1,13 +1,18 @@
-import type { OrdersTableType as Order } from "../db/schema"
+import type { OrdersDetailsTableType, OrdersTableType } from "../db/schema"
 
 // cash: "Efectivo", transfer: "Transferencia", mercado_pago: "Mercado Pago",
 export const orderPaymentMethodValues = ["cash", "transfer", "mercado_pago"] as const
 // on_hold: "En espera", delivered: "Entregado", cancelled: "Cancelado", deleted: "Eliminado"
 export const orderStatusValues = ["delivered", "on_hold", "deleted", "cancelled"] as const
 
+export type Order = OrdersTableType
+export type OrderDetails = OrdersDetailsTableType
 export type OrderId = Order["_id"]
 export type OrderPaymentMethod = (typeof orderPaymentMethodValues)[number]
 export type OrderStatus = (typeof orderStatusValues)[number]
+export type OrderStatusAll = "all" | OrderStatus
+export type OrderSortBy = "created_at" | "total" | "status"
+export type OrderSort = "asc" | "desc"
 
 export type InsertOrderDetails = {
 	product_id: string
@@ -25,11 +30,12 @@ export type InsertOrder = {
 }
 
 export type SelectOrders = {
-	status: "all" | OrderStatus
-	from: string | undefined
-	to: string | undefined
-	sort_by?: "created_at" | "total" | "status"
-	sort_order?: "asc" | "desc"
-	page?: number
+	page: number
 	per_page?: number
+	from?: string
+	to?: string
+	status: OrderStatusAll
+	sort_by?: OrderSortBy
+	sort_order?: OrderSort
+	user_id: string
 }

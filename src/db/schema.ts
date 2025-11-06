@@ -41,7 +41,7 @@ export const OrdersDetailsTable = table(
 	"orders_details",
 	{
 		_id: t.text("_id").primaryKey().notNull(),
-		quantity: t.numeric("quantity").notNull(),
+		quantity: t.int("quantity").notNull(),
 		price: t.numeric("price").notNull(),
 		observation: t.text("observation"),
 		order_id: t.text("order_id").references(() => OrdersTable._id),
@@ -59,6 +59,7 @@ export const ProductsTable = table(
 		name: t.text("name").notNull(),
 		unit_price: t.numeric("unit_price").notNull(),
 		description: t.text("description"),
+		disabled: t.text("disabled", { enum: ["true", "false"] }).default("false"),
 		created_at: t.text("created_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
 		image_id: t.text("image_id").references(() => UserImagesTable._id),
 		user_id: t.text("user_id").references(() => UserTable._id)

@@ -6,7 +6,6 @@ import type { InsertOrder, InsertOrderDetails, SelectOrders } from "../types/ord
 
 export async function insertOrder({ name, phone, payment_method, user_id, orders }: InsertOrder) {
 	if (!user_id || !orders?.length) return null
-
 	const _id = crypto.randomUUID()
 	let total = 0
 
@@ -46,8 +45,8 @@ export async function insertOrder({ name, phone, payment_method, user_id, orders
 		const detailInserts = orderDetailsData.map(({ price, quantity, observation, product_id }) =>
 			db.insert(OrdersDetailsTable).values({
 				_id: crypto.randomUUID(),
-				quantity: quantity.toString(),
 				price: price.toString(),
+				quantity,
 				observation,
 				product_id,
 				order_id: orderResult._id
@@ -56,32 +55,42 @@ export async function insertOrder({ name, phone, payment_method, user_id, orders
 		await Promise.all(detailInserts)
 		return { orderResult, details: orderDetailsData }
 	} catch (_) {
-		return []
+		throw { status: 500, error: { message: "Server Internal Error" } }
 	}
 }
 
 export async function selectOrders({
 	page = 1,
 	per_page = 15,
-	status,
-	// from,
-	// to,
+	status = "all",
+	from,
+	to,
 	sort_by = "created_at",
-	sort_order = "desc"
+	sort_order = "desc",
+	user_id
 }: SelectOrders) {
 	try {
 		const conditions = []
 		const offset = (page - 1) * per_page
 
-		if (status && status !== "all") conditions.push(eq(OrdersTable.status, status))
+		if (status !== "all") conditions.push(eq(OrdersTable.status, status))
 		// if (from) conditions.push(gte(OrdersTable.created_at, new Date(from)))
 		// if (to) conditions.push(lte(OrdersTable.created_at, new Date(to)))
+		console.log("from", from, "to", to)
 
 		const result = await db
-			.select()
+			.select({
+				_id: OrdersTable._id,
+				name: OrdersTable.name,
+				phone: OrdersTable.phone,
+				payment_method: OrdersTable.payment_method,
+				total: OrdersTable.total,
+				created_at: OrdersTable.created_at,
+				status: OrdersTable.status
+			})
 			.from(OrdersTable)
 			.leftJoin(OrdersDetailsTable, eq(OrdersTable._id, OrdersDetailsTable._id))
-			.where(and(...conditions))
+			.where(and(...conditions, eq(OrdersTable.user_id, user_id)))
 			.orderBy(sort_order === "asc" ? asc(OrdersTable[sort_by]) : desc(OrdersTable[sort_by]))
 			.limit(per_page)
 			.offset(offset)

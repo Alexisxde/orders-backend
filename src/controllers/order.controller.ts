@@ -1,16 +1,10 @@
 import type { Request, Response } from "express"
 import { insertOrder, selectOrders } from "../models/order.model"
-import { orderCreateSchema } from "../schemas/order.schema"
 
 export async function createOrder(req: Request, res: Response) {
-	if (!req.user) return res.status(401).json({ error: "Unauthorized" })
-	const { _id: user_id } = req.user
-	const { success, error, data } = orderCreateSchema.safeParse(req.body)
-
-	if (!success)
-		return res.status(400).json({ errors: error.errors.map((err) => ({ field: err.path[0], message: err.message })) })
-
-	const { name, payment_method, phone, orders } = data
+	if (!req.body.user) return res.status(401).json({ error: "Unauthorized" })
+	const { _id: user_id } = req.body.user
+	const { name, payment_method, phone, orders } = req.body
 
 	try {
 		const data = await insertOrder({ name, payment_method, phone, user_id, orders })
@@ -21,12 +15,12 @@ export async function createOrder(req: Request, res: Response) {
 }
 
 export async function getOrders(req: Request, res: Response) {
-	if (!req.user) return res.status(401).json({ error: "Unauthorized" })
-	const { _id: user_id } = req.user
-	const { page } = req.query as { page?: string }
+	if (!req.body.user) return res.status(401).json({ error: "Unauthorized" })
+	const { _id: user_id } = req.body.user
+	const { page, per_page, status, sort_by, sort_order } = req.body
 
 	try {
-		const data = await selectOrders({ user_id })
-		res.status(200).json({ success: true, data: [], error: null })
+		const data = await selectOrders({ page, per_page, status, sort_by, sort_order, user_id })
+		res.status(200).json({ success: true, data, error: null })
 	} catch (_) {}
 }

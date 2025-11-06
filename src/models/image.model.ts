@@ -5,11 +5,14 @@ import type { ImageCreate } from "../types/image"
 
 export async function insertImage({ id, url, user_id }: ImageCreate) {
 	const _id = crypto.randomUUID()
-
 	try {
-		const result = await db.insert(ImagesTable).values({ _id: id, url }).returning()
-		await db.insert(UserImagesTable).values({ _id, image_id: id, user_id })
-		return result
+		const [image] = await db.insert(ImagesTable).values({ _id: id, url }).returning()
+		const [result] = await db.insert(UserImagesTable).values({ _id, image_id: image._id, user_id }).returning()
+		return {
+			_id: result._id,
+			image_id: result.image_id,
+			url: image.url
+		}
 	} catch (_) {}
 }
 

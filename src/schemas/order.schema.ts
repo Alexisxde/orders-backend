@@ -24,23 +24,25 @@ export const orderCreateSchema = z.object({
 		.min(1, { message: "Debe haber al menos un producto en la orden." })
 })
 
-export const orderSelectSchema = z
-	.object({
-		status: z.enum([...orderStatusValues, "all"], { errorMap: () => ({ message: "Estado invalido." }) }),
-		from: z
-			.string()
-			.refine((val) => !Number.isNaN(Date.parse(val)), { message: "La fecha 'from' no es válida." })
-			.optional(),
-		to: z
-			.string()
-			.refine((val) => !Number.isNaN(Date.parse(val)), { message: "La fecha 'to' no es válida." })
-			.optional(),
-		sort_by: z.enum(["created_at", "total", "status"]).optional().default("created_at"),
-		sort_order: z.enum(["asc", "desc"]).optional().default("desc"),
-		page: z.number().int().positive().optional().default(1),
-		per_page: z.number().int().positive().optional().default(15)
-	})
-	.refine((data) => data?.from && data.to && new Date(data?.from) <= new Date(data.to), {
-		message: "La fecha 'from' debe ser anterior o igual a 'to'.",
-		path: ["to"]
-	})
+export const orderSelectSchema = z.object({
+	status: z
+		.enum([...orderStatusValues, "all"], { errorMap: () => ({ message: "Estado invalido." }) })
+		.optional()
+		.default("all"),
+	from: z
+		.string()
+		.refine((val) => val && !Number.isNaN(Date.parse(val)), { message: "La fecha 'from' no es válida." })
+		.optional(),
+	to: z
+		.string()
+		.refine((val) => val && !Number.isNaN(Date.parse(val)), { message: "La fecha 'to' no es válida." })
+		.optional(),
+	sort_by: z.enum(["created_at", "total", "status"]).optional().default("created_at"),
+	sort_order: z.enum(["asc", "desc"]).optional().default("desc"),
+	page: z.number().int().positive().optional().default(1),
+	per_page: z.number().int().positive().optional().default(15)
+})
+// .refine((data) => new Date(data.from) <= new Date(data.to), {
+// 	message: "La fecha 'from' debe ser anterior o igual a 'to'.",
+// 	path: ["to"]
+// })
