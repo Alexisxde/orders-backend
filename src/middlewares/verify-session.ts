@@ -6,7 +6,7 @@ import type { UserJWT } from "../types/auth"
 export const verifySession = (req: Request, res: Response, next: NextFunction) => {
 	const token = req.cookies.token
 	const refreshToken = req.cookies.refreshToken
-	if (!refreshToken) return res.status(401).json({ success: false, error: "No hay refresh token." })
+	if (!refreshToken) return res.status(401).json({ success: false, error: "Unauthorized" })
 
 	try {
 		const decoded = jwt.verify(token, JWT_SECRET) as UserJWT

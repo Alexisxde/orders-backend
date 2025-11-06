@@ -2,7 +2,6 @@ import type { Request, Response } from "express"
 import { getProduct, getProducts, insertProduct } from "../models/product.model"
 
 export async function createProduct(req: Request, res: Response) {
-	if (!req.body.user) return res.status(401).json({ error: "Unauthorized" })
 	const { _id: user_id } = req.body.user
 	const { name, price, description, image_id } = req.body
 
@@ -26,7 +25,6 @@ export async function selectProducts(req: Request, res: Response) {
 }
 
 export async function selectIdProduct(req: Request<{ id: string }>, res: Response) {
-	if (!req.body.user) return res.status(401).json({ error: "Unauthorized" })
 	const { _id: user_id } = req.body.user
 	const { id } = req.params
 
