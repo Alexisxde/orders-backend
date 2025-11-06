@@ -30,8 +30,8 @@ export type InsertOrder = {
 }
 
 export type SelectOrders = {
-	page: number
-	per_page?: number
+	page?: string
+	per_page?: string
 	from?: string
 	to?: string
 	status: OrderStatusAll

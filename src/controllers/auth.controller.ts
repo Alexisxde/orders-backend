@@ -3,37 +3,33 @@ import type { Request, Response } from "express"
 import jwt from "jsonwebtoken"
 import { JWT_SECRET, JWT_SECRET_REFRESHTOKEN, NODE_ENV } from "../config"
 import { createUser, getUserByEmail, UserById } from "../models/user.model"
-import { userCreateSchema } from "../schemas/auth.schema"
-import type { UserCreate, UserJWT, UserLogin } from "../types/auth"
+import type { UserJWT } from "../types/auth"
+import type { HttpError } from "../types/error"
 
-export async function registerUser(req: Request<unknown, unknown, UserCreate>, res: Response) {
-	const { success, error, data } = userCreateSchema.safeParse(req.body)
-
-	if (!success)
-		return res.status(400).json({ errors: error.errors.map((err) => ({ field: err.path[0], message: err.message })) })
-
-	const { name, email, password } = data
+export async function registerUser(req: Request, res: Response) {
+	const { name, email, password } = req.body
 
 	try {
 		const existingUser = await getUserByEmail(email)
-		if (existingUser)
-			return res.status(409).json({ success: false, error: "El usuario ya existe. Intentelo de nuevo con otro email." })
+		if (existingUser) throw { status: 409, message: "El usuario ya existe. Intentelo de nuevo con otro email." }
 
-		const newUser = await createUser({ name, email, password })
-		res.status(201).json({ success: true, data: newUser, error: null })
-	} catch (_) {
-		res.status(500).json({ success: false, error: "Error al registrar el usuario. Intentelo de nuevo más tarde." })
+		const data = await createUser({ name, email, password })
+		res.status(201).json({ success: true, data, error: null })
+	} catch (e: unknown) {
+		const err = e as HttpError
+		res.status(err?.status || 500).json({ success: false, error: err?.message || "Internal Server Error" })
 	}
 }
 
-export async function loginUser(req: Request<unknown, unknown, UserLogin>, res: Response) {
+export async function loginUser(req: Request, res: Response) {
 	const { email, password } = req.body
-	const user = await getUserByEmail(email)
-	if (!user) return res.status(404).json({ error: "Usuario no encontrado. Por favor intentelo de nuevo." })
 
 	try {
+		const user = await getUserByEmail(email)
+		if (!user) throw { status: 404, message: "Usuario no encontrado. Por favor intentelo de nuevo." }
+
 		const isValid = await bcrypt.compare(password, user.password)
-		if (!isValid) return res.status(404).json({ error: "Las credenciales proporcionadas no son válidas." })
+		if (!isValid) throw { status: 404, message: "Las credenciales proporcionadas no son válidas." }
 
 		const { _id, role } = user
 		const token = jwt.sign({ _id, role }, JWT_SECRET, { expiresIn: "8h" })
@@ -54,8 +50,9 @@ export async function loginUser(req: Request<unknown, unknown, UserLogin>, res: 
 
 		const { password: _, ...data } = user
 		res.status(200).json({ success: true, data, error: null })
-	} catch (_) {
-		res.status(500).json({ success: false, error: "Error al iniciar sesión. Intentelo de nuevo." })
+	} catch (e: unknown) {
+		const err = e as HttpError
+		res.status(err?.status || 500).json({ success: false, error: err?.message || "Internal Server Error" })
 	}
 }
 
@@ -73,33 +70,34 @@ export async function logoutUser(_: Request, res: Response) {
 			sameSite: "lax"
 		})
 
-		res.status(200).json({ success: true, message: "Logout exitoso", error: null })
-	} catch (_) {
-		res.status(500).json({ success: false, error: "Error al cerrar sesión. Intentelo de nuevo." })
+		res.status(200).json({ success: true, error: null })
+	} catch (e: unknown) {
+		const err = e as HttpError
+		res.status(err?.status || 500).json({ success: false, error: err?.message || "Internal Server Error" })
 	}
 }
 
 export async function getCurrentUser(req: Request, res: Response) {
 	const token = req.cookies.token
-	if (!token) return res.status(401).json({ success: false, error: "No hay token." })
-
 	try {
+		if (!token) throw { status: 401, message: "No hay token." }
 		const decoded = jwt.verify(token, JWT_SECRET) as UserJWT
 		const user = await UserById(decoded._id)
-		if (!user) return res.status(404).json({ success: false, error: "Usuario no encontrado." })
-		const { password: _, ...data } = user
+		if (!user) throw { status: 404, message: "Usuario no encontrado." }
 
+		const { password: _, ...data } = user
 		res.status(200).json({ success: true, data, error: null })
-	} catch (_) {
-		res.status(500).json({ success: false, error: "Error al obtener el usuario. Intentelo de nuevo." })
+	} catch (e: unknown) {
+		const err = e as HttpError
+		res.status(err?.status || 500).json({ success: false, error: err?.message || "Internal Server Error" })
 	}
 }
 
 export async function refresh(req: Request, res: Response) {
 	const refreshToken = req.cookies.refreshToken
-	if (!refreshToken) return res.status(401).json({ success: false, error: "No hay refresh token." })
 
 	try {
+		if (!refreshToken) throw { status: 401, message: "No hay refresh token." }
 		const decoded = jwt.verify(refreshToken, JWT_SECRET_REFRESHTOKEN) as UserJWT
 		const newToken = jwt.sign(decoded, JWT_SECRET, { expiresIn: "8h" })
 
@@ -111,7 +109,8 @@ export async function refresh(req: Request, res: Response) {
 		})
 
 		return res.status(200).json({ success: true, message: "Token renovado.", error: null })
-	} catch (_) {
-		return res.status(403).json({ success: false, error: "Refresh token inválido o expirado." })
+	} catch (e: unknown) {
+		const err = e as HttpError
+		res.status(err?.status || 500).json({ success: false, error: err?.message || "Internal Server Error" })
 	}
 }

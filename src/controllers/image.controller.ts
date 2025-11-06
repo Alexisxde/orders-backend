@@ -2,9 +2,10 @@ import type { Request, Response } from "express"
 import { getImages, insertImage } from "../models/image.model"
 import { uploadSchema } from "../schemas/image.schema"
 import cloudinary from "../services/cloudinary"
+import type { UserJWT } from "../types/auth"
 
 export async function getAllImages(req: Request, res: Response) {
-	const { _id: user_id } = req.body.user
+	const { _id: user_id } = req.body.user as UserJWT
 
 	try {
 		const data = await getImages(user_id)
@@ -13,7 +14,7 @@ export async function getAllImages(req: Request, res: Response) {
 }
 
 export async function postImage(req: Request, res: Response) {
-	const { _id: user_id } = req.body.user
+	const { _id: user_id } = req.body.user as UserJWT
 	const errors: { field: string; message: string }[] = []
 	const { success, error } = uploadSchema.safeParse(req.body)
 

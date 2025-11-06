@@ -39,8 +39,8 @@ export const orderSelectSchema = z.object({
 		.optional(),
 	sort_by: z.enum(["created_at", "total", "status"]).optional().default("created_at"),
 	sort_order: z.enum(["asc", "desc"]).optional().default("desc"),
-	page: z.number().int().positive().optional().default(1),
-	per_page: z.number().int().positive().optional().default(15)
+	page: z.string().optional().default("1"),
+	per_page: z.string().optional().default("15")
 })
 // .refine((data) => new Date(data.from) <= new Date(data.to), {
 // 	message: "La fecha 'from' debe ser anterior o igual a 'to'.",

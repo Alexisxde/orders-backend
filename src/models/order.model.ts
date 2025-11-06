@@ -5,10 +5,8 @@ import { getProduct } from "../models/product.model"
 import type { InsertOrder, InsertOrderDetails, SelectOrders } from "../types/order"
 
 export async function insertOrder({ name, phone, payment_method, user_id, orders }: InsertOrder) {
-	if (!user_id || !orders?.length) return null
-	const _id = crypto.randomUUID()
 	let total = 0
-
+	const _id = crypto.randomUUID()
 	const orderDetailsData: InsertOrderDetails[] = []
 
 	try {
@@ -16,7 +14,7 @@ export async function insertOrder({ name, phone, payment_method, user_id, orders
 			if (!order.product_id) continue
 
 			const product = await getProduct({ id: order.product_id, user_id })
-			const price = product?.[0]?.price
+			const price = product?.price
 			if (!price) continue
 
 			const unit_price = Number(price)
@@ -30,7 +28,7 @@ export async function insertOrder({ name, phone, payment_method, user_id, orders
 			})
 		}
 
-		const [orderResult] = await db
+		const [result] = await db
 			.insert(OrdersTable)
 			.values({
 				_id,
@@ -49,34 +47,41 @@ export async function insertOrder({ name, phone, payment_method, user_id, orders
 				quantity,
 				observation,
 				product_id,
-				order_id: orderResult._id
+				order_id: result._id
 			})
 		)
 		await Promise.all(detailInserts)
-		return { orderResult, details: orderDetailsData }
+		return { result, details: orderDetailsData }
 	} catch (_) {
-		throw { status: 500, error: { message: "Server Internal Error" } }
+		throw {
+			status: 500,
+			message: "No se pudo guardar la información en la base de datos. Intente nuevamente más tarde."
+		}
 	}
 }
 
 export async function selectOrders({
-	page = 1,
-	per_page = 15,
+	page = "1",
+	per_page = "15",
 	status = "all",
-	from,
-	to,
+	// from,
+	// to,
 	sort_by = "created_at",
 	sort_order = "desc",
 	user_id
 }: SelectOrders) {
-	try {
-		const conditions = []
-		const offset = (page - 1) * per_page
+	const conditions = []
+	const page_number = parseInt(page, 2)
+	const per_page_number = parseInt(per_page, 2)
+	const offset = (page_number - 1) * per_page_number
+	if (!Number.isFinite(page_number) || page_number <= 0 || !Number.isFinite(per_page_number) || per_page_number <= 0) {
+		throw { status: 400, message: "Los parámetros de paginación no son válidos." }
+	}
 
+	try {
 		if (status !== "all") conditions.push(eq(OrdersTable.status, status))
 		// if (from) conditions.push(gte(OrdersTable.created_at, new Date(from)))
 		// if (to) conditions.push(lte(OrdersTable.created_at, new Date(to)))
-		console.log("from", from, "to", to)
 
 		const result = await db
 			.select({
@@ -92,11 +97,14 @@ export async function selectOrders({
 			.leftJoin(OrdersDetailsTable, eq(OrdersTable._id, OrdersDetailsTable._id))
 			.where(and(...conditions, eq(OrdersTable.user_id, user_id)))
 			.orderBy(sort_order === "asc" ? asc(OrdersTable[sort_by]) : desc(OrdersTable[sort_by]))
-			.limit(per_page)
+			.limit(page_number)
 			.offset(offset)
 
-		return result
+		return { result, per_page: per_page_number, page: page_number }
 	} catch (_) {
-		return []
+		throw {
+			status: 500,
+			message: "No se pudo obtener la información desde la base de datos. Intente nuevamente más tarde."
+		}
 	}
 }

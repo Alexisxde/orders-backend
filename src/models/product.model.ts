@@ -6,13 +6,16 @@ import type { InsertProduct } from "../types/product"
 export async function insertProduct({ name, unit_price, description, image_id, user_id }: InsertProduct) {
 	const _id = crypto.randomUUID()
 	try {
-		const result = await db
+		const [result] = await db
 			.insert(ProductsTable)
 			.values({ _id, name, unit_price, description, image_id, user_id })
 			.returning()
-		return result[0]
+		return result
 	} catch (_) {
-		return []
+		throw {
+			status: 500,
+			message: "No se pudo guardar la información en la base de datos. Intente nuevamente más tarde."
+		}
 	}
 }
 
@@ -31,12 +34,14 @@ export async function getProducts(user_id: string) {
 			.leftJoin(UserImagesTable, eq(UserImagesTable._id, ProductsTable.image_id))
 			.leftJoin(ImagesTable, eq(ImagesTable._id, UserImagesTable.image_id))
 		return result
-	} catch (_) {}
+	} catch (_) {
+		throw { status: 500, message: "No se pudo obtener la información de los productos. Intente nuevamente más tarde." }
+	}
 }
 
 export async function getProduct({ id, user_id }: { id: string; user_id: string }) {
 	try {
-		const result = await db
+		const [result] = await db
 			.select({
 				_id: ProductsTable._id,
 				name: ProductsTable.name,
@@ -49,5 +54,7 @@ export async function getProduct({ id, user_id }: { id: string; user_id: string 
 			.leftJoin(UserImagesTable, eq(UserImagesTable._id, ProductsTable.image_id))
 			.leftJoin(ImagesTable, eq(ImagesTable._id, UserImagesTable.image_id))
 		return result
-	} catch (_) {}
+	} catch (_) {
+		throw { status: 500, message: "No se pudo obtener la información del producto. Intente nuevamente más tarde." }
+	}
 }
