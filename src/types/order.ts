@@ -4,14 +4,14 @@ import type { OrdersDetailsTableType, OrdersTableType } from "../db/schema"
 export const orderPaymentMethodValues = ["cash", "transfer", "mercado_pago"] as const
 // on_hold: "En espera", delivered: "Entregado", cancelled: "Cancelado", deleted: "Eliminado"
 export const orderStatusValues = ["delivered", "on_hold", "deleted", "cancelled"] as const
+export const orderSortByValues = ["created_at", "total", "status"] as const
 
 export type Order = OrdersTableType
 export type OrderDetails = OrdersDetailsTableType
 export type OrderId = Order["_id"]
 export type OrderPaymentMethod = (typeof orderPaymentMethodValues)[number]
 export type OrderStatus = (typeof orderStatusValues)[number]
-export type OrderStatusAll = "all" | OrderStatus
-export type OrderSortBy = "created_at" | "total" | "status"
+export type OrderSortBy = (typeof orderSortByValues)[number]
 export type OrderSort = "asc" | "desc"
 
 export type InsertOrderDetails = {
@@ -34,7 +34,7 @@ export type SelectOrders = {
 	per_page?: string
 	from?: string
 	to?: string
-	status: OrderStatusAll
+	status?: OrderStatus
 	sort_by?: OrderSortBy
 	sort_order?: OrderSort
 	user_id: string

@@ -63,7 +63,7 @@ const USERS = [
 
 const ORDERS = [
 	{
-		_id: "861be953-4bd0-447b-899d-a968720bee7d",
+		_id: "d52bfdc9-ff38-4b92-aa8b-2d1db241145e",
 		payment_method: "mercado_pago",
 		total: "20000",
 		name: "Olivarez Jose",
@@ -76,8 +76,8 @@ const ORDER_DETAILS = [
 		_id: "17083197-40ff-44ed-b4dd-ab72a3c27942",
 		quantity: 2,
 		price: "10000",
-		observation: "Sin cebolla por favor",
-		order_id: "861be953-4bd0-447b-899d-a968720bee7d",
+		observation: "Una sin cebolla",
+		order_id: "d52bfdc9-ff38-4b92-aa8b-2d1db241145e",
 		product_id: "1be933f9-ee4a-49a1-8b50-310dd0bb8961"
 	}
 ] as OrderDetails[]

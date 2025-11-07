@@ -1,8 +1,9 @@
-import { and, asc, desc, eq } from "drizzle-orm"
+import { and, asc, count, desc, eq, gte, lte } from "drizzle-orm"
 import db from "../db/db"
 import { OrdersDetailsTable, OrdersTable } from "../db/schema"
 import { getProduct } from "../models/product.model"
 import type { InsertOrder, InsertOrderDetails, SelectOrders } from "../types/order"
+import { orderSortByValues, orderStatusValues } from "../types/order"
 
 export async function insertOrder({ name, phone, payment_method, user_id, orders }: InsertOrder) {
 	let total = 0
@@ -12,7 +13,6 @@ export async function insertOrder({ name, phone, payment_method, user_id, orders
 	try {
 		for (const order of orders) {
 			if (!order.product_id) continue
-
 			const product = await getProduct({ id: order.product_id, user_id })
 			const price = product?.price
 			if (!price) continue
@@ -63,26 +63,44 @@ export async function insertOrder({ name, phone, payment_method, user_id, orders
 export async function selectOrders({
 	page = "1",
 	per_page = "15",
-	status = "all",
-	// from,
-	// to,
+	status,
+	from,
+	to,
 	sort_by = "created_at",
 	sort_order = "desc",
 	user_id
 }: SelectOrders) {
-	const conditions = []
-	const page_number = parseInt(page, 2)
-	const per_page_number = parseInt(per_page, 2)
-	const offset = (page_number - 1) * per_page_number
-	if (!Number.isFinite(page_number) || page_number <= 0 || !Number.isFinite(per_page_number) || per_page_number <= 0) {
+	const conditions = [eq(OrdersTable.user_id, user_id)]
+	const page_number = parseInt(page)
+	const limit = parseInt(per_page)
+	const offset = (page_number - 1) * limit
+	if (!Number.isFinite(page_number) || page_number <= 0 || !Number.isFinite(limit) || limit <= 0) {
 		throw { status: 400, message: "Los parámetros de paginación no son válidos." }
 	}
 
-	try {
-		if (status !== "all") conditions.push(eq(OrdersTable.status, status))
-		// if (from) conditions.push(gte(OrdersTable.created_at, new Date(from)))
-		// if (to) conditions.push(lte(OrdersTable.created_at, new Date(to)))
+	if (!orderSortByValues.includes(sort_by)) sort_by = "created_at"
+	if (!["asc", "desc"].includes(sort_order)) sort_order = "desc"
+	if (status && orderStatusValues.includes(status)) conditions.push(eq(OrdersTable.status, status))
+	if (from && to) {
+		const regex = /^\d{4}-\d{2}-\d{2}$/
+		if (Number.isNaN(Date.parse(from)) || Number.isNaN(Date.parse(from)))
+			throw { status: 400, message: "Error al ingresar unas de las fechas." }
+		const dateValid = regex.test(from) && regex.test(to)
+		if (!dateValid) throw { status: 400, message: "Las fechas deben ter formato YYYY-MM-DD." }
 
+		const targetFromDate = new Date(from)
+		const startOfDay = new Date(targetFromDate)
+		startOfDay.setHours(0, 0, 0, 0)
+
+		const targetToDate = new Date(to)
+		const endOfDay = new Date(targetToDate)
+		endOfDay.setHours(23, 59, 59, 999)
+
+		conditions.push(gte(OrdersTable.created_at, startOfDay.toISOString()))
+		conditions.push(lte(OrdersTable.created_at, endOfDay.toISOString()))
+	}
+
+	try {
 		const result = await db
 			.select({
 				_id: OrdersTable._id,
@@ -94,13 +112,19 @@ export async function selectOrders({
 				status: OrdersTable.status
 			})
 			.from(OrdersTable)
-			.leftJoin(OrdersDetailsTable, eq(OrdersTable._id, OrdersDetailsTable._id))
-			.where(and(...conditions, eq(OrdersTable.user_id, user_id)))
+			.leftJoin(OrdersDetailsTable, eq(OrdersTable._id, OrdersDetailsTable.order_id))
+			.where(and(...conditions))
 			.orderBy(sort_order === "asc" ? asc(OrdersTable[sort_by]) : desc(OrdersTable[sort_by]))
-			.limit(page_number)
+			.limit(limit)
 			.offset(offset)
 
-		return { result, per_page: per_page_number, page: page_number }
+		const [total] = await db
+			.select({ count: count() })
+			.from(OrdersTable)
+			.where(and(...conditions))
+		const pages = Math.ceil(total.count / limit)
+
+		return { page: page_number, pages, result }
 	} catch (_) {
 		throw {
 			status: 500,

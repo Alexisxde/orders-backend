@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { orderPaymentMethodValues, orderStatusValues } from "../types/order"
+import { orderPaymentMethodValues, orderSortByValues, orderStatusValues } from "../types/order"
 
 export const orderCreateSchema = z.object({
 	name: z
@@ -24,25 +24,30 @@ export const orderCreateSchema = z.object({
 		.min(1, { message: "Debe haber al menos un producto en la orden." })
 })
 
-export const orderSelectSchema = z.object({
-	status: z
-		.enum([...orderStatusValues, "all"], { errorMap: () => ({ message: "Estado invalido." }) })
-		.optional()
-		.default("all"),
-	from: z
-		.string()
-		.refine((val) => val && !Number.isNaN(Date.parse(val)), { message: "La fecha 'from' no es válida." })
-		.optional(),
-	to: z
-		.string()
-		.refine((val) => val && !Number.isNaN(Date.parse(val)), { message: "La fecha 'to' no es válida." })
-		.optional(),
-	sort_by: z.enum(["created_at", "total", "status"]).optional().default("created_at"),
-	sort_order: z.enum(["asc", "desc"]).optional().default("desc"),
-	page: z.string().optional().default("1"),
-	per_page: z.string().optional().default("15")
-})
-// .refine((data) => new Date(data.from) <= new Date(data.to), {
-// 	message: "La fecha 'from' debe ser anterior o igual a 'to'.",
-// 	path: ["to"]
-// })
+export const orderSelectSchema = z
+	.object({
+		status: z.enum(orderStatusValues, { errorMap: () => ({ message: "Estado invalido." }) }).optional(),
+		from: z.string().optional(),
+		to: z.string().optional(),
+		sort_by: z
+			.enum(orderSortByValues, { errorMap: () => ({ message: "Ordenar By invalido." }) })
+			.optional()
+			.default("created_at"),
+		sort_order: z.enum(["asc", "desc"]).optional().default("desc"),
+		page: z.string().optional().default("1"),
+		limit: z.string().optional().default("15")
+	})
+	.refine(
+		({ from, to }) => {
+			if (from && to) {
+				const fromDate = new Date(from).getTime()
+				const toDate = new Date(to).getTime()
+				return fromDate <= toDate
+			}
+			return true
+		},
+		{
+			message: "La fecha 'from' debe ser anterior o igual a 'to'.",
+			path: ["to"]
+		}
+	)
