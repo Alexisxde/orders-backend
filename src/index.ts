@@ -17,7 +17,7 @@ app.use("/api/auth", authRouter)
 app.use("/api/products", verifySession, productRouter)
 app.use("/api/images", verifySession, imageRouter)
 app.use("/api/orders", verifySession, orderRouter)
-app.use("/api/report", verifySession, reportRouter)
+app.use("/api/reports", verifySession, reportRouter)
 
 server.listen(PORT, () => {
 	// biome-ignore lint/suspicious/noConsole: Permitido para mirar el servidor.

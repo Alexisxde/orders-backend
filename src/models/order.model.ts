@@ -141,14 +141,13 @@ export async function selectOrdersToMonth({
 	status: OrderStatus
 	user_id: string
 }) {
-	if (!year) throw { status: 400, error: "Se necesita un año para obtener información." }
-
 	try {
 		const result = await db
 			.select({
 				month: sql`strftime('%m', ${OrdersTable.created_at})`.as("month"),
 				status: OrdersTable.status,
-				count: count()
+				count: count(),
+				total: sql`SUM(${OrdersTable.total})`.as("total")
 			})
 			.from(OrdersTable)
 			.where(
@@ -179,32 +178,49 @@ export async function selectOrdersToDay({
 	status: OrderStatus
 	user_id: string
 }) {
-	if (!date) throw { status: 400, error: "Se necesita un año para obtener información." }
-	const regex = /^\d{4}-\d{2}-\d{2}$/
-	const dateValid = regex.test(date)
-	if (Number.isNaN(Date.parse(date)) || !dateValid)
-		throw { status: 400, error: "La fecha deben tener formato YYYY-MM-DD." }
-	const dateObj = new Date(date).toISOString().split("T")[0]
-
 	try {
 		const [result] = await db
 			.select({
 				date: sql`strftime('%Y-%m-%d', ${OrdersTable.created_at})`.as("date"),
 				status: OrdersTable.status,
+				total: sql`SUM(${OrdersTable.total})`.as("total"),
 				count: count()
 			})
 			.from(OrdersTable)
 			.where(
 				and(
 					eq(OrdersTable.user_id, user_id),
-					eq(sql`strftime('%Y-%m-%d', ${OrdersTable.created_at})`, dateObj),
+					eq(sql`strftime('%Y-%m-%d', ${OrdersTable.created_at})`, date),
 					eq(OrdersTable.status, status)
 				)
 			)
 			.groupBy(sql`strftime('%m-%d', ${OrdersTable.created_at})`)
 			.orderBy(sql`strftime('%m-%d', ${OrdersTable.created_at})`)
 
-		return { date, status, count: result?.count ?? 0 }
+		return { date, status, total: result?.total ?? 0, count: result?.count ?? 0 }
+	} catch (_) {
+		throw {
+			status: 500,
+			error: "No se pudo obtener la información desde la base de datos. Intente nuevamente más tarde."
+		}
+	}
+}
+
+export async function selectOrdersToClient({ user_id }: { user_id: string }) {
+	try {
+		const result = await db
+			.select({
+				client: OrdersTable.name,
+				total: sql`SUM(${OrdersTable.total})`.as("total"),
+				count: count()
+			})
+			.from(OrdersTable)
+			.where(and(eq(OrdersTable.user_id, user_id), eq(OrdersTable.status, "delivered")))
+			.groupBy(OrdersTable.name)
+			.orderBy(desc(OrdersTable.total))
+			.limit(10)
+
+		return result
 	} catch (_) {
 		throw {
 			status: 500,
