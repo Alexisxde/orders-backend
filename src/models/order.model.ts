@@ -55,7 +55,7 @@ export async function insertOrder({ name, phone, payment_method, user_id, orders
 	} catch (_) {
 		throw {
 			status: 500,
-			message: "No se pudo guardar la información en la base de datos. Intente nuevamente más tarde."
+			error: "No se pudo guardar la información en la base de datos. Intente nuevamente más tarde."
 		}
 	}
 }
@@ -75,7 +75,7 @@ export async function selectOrders({
 	const limit = parseInt(per_page)
 	const offset = (page_number - 1) * limit
 	if (!Number.isFinite(page_number) || page_number <= 0 || !Number.isFinite(limit) || limit <= 0) {
-		throw { status: 400, message: "Los parámetros de paginación no son válidos." }
+		throw { status: 400, error: "Los parámetros de paginación no son válidos." }
 	}
 
 	if (!orderSortByValues.includes(sort_by)) sort_by = "created_at"
@@ -85,7 +85,7 @@ export async function selectOrders({
 		const regex = /^\d{4}-\d{2}-\d{2}$/
 		const dateValid = regex.test(from) && regex.test(to)
 		if (!dateValid || Number.isNaN(Date.parse(from)) || Number.isNaN(Date.parse(from)))
-			throw { status: 400, message: "Las fechas deben tener formato YYYY-MM-DD." }
+			throw { status: 400, error: "Las fechas deben tener formato YYYY-MM-DD." }
 
 		const targetFromDate = new Date(from)
 		const startOfDay = new Date(targetFromDate)
@@ -127,7 +127,7 @@ export async function selectOrders({
 	} catch (_) {
 		throw {
 			status: 500,
-			message: "No se pudo obtener la información desde la base de datos. Intente nuevamente más tarde."
+			error: "No se pudo obtener la información desde la base de datos. Intente nuevamente más tarde."
 		}
 	}
 }
@@ -141,7 +141,7 @@ export async function selectOrdersToMonth({
 	status: OrderStatus
 	user_id: string
 }) {
-	if (!year) throw { status: 400, message: "Se necesita un año para obtener información." }
+	if (!year) throw { status: 400, error: "Se necesita un año para obtener información." }
 
 	try {
 		const result = await db
@@ -165,7 +165,7 @@ export async function selectOrdersToMonth({
 	} catch (_) {
 		throw {
 			status: 500,
-			message: "No se pudo obtener la información desde la base de datos. Intente nuevamente más tarde."
+			error: "No se pudo obtener la información desde la base de datos. Intente nuevamente más tarde."
 		}
 	}
 }
@@ -179,11 +179,11 @@ export async function selectOrdersToDay({
 	status: OrderStatus
 	user_id: string
 }) {
-	if (!date) throw { status: 400, message: "Se necesita un año para obtener información." }
+	if (!date) throw { status: 400, error: "Se necesita un año para obtener información." }
 	const regex = /^\d{4}-\d{2}-\d{2}$/
 	const dateValid = regex.test(date)
 	if (Number.isNaN(Date.parse(date)) || !dateValid)
-		throw { status: 400, message: "La fecha deben tener formato YYYY-MM-DD." }
+		throw { status: 400, error: "La fecha deben tener formato YYYY-MM-DD." }
 	const dateObj = new Date(date).toISOString().split("T")[0]
 
 	try {
@@ -208,7 +208,7 @@ export async function selectOrdersToDay({
 	} catch (_) {
 		throw {
 			status: 500,
-			message: "No se pudo obtener la información desde la base de datos. Intente nuevamente más tarde."
+			error: "No se pudo obtener la información desde la base de datos. Intente nuevamente más tarde."
 		}
 	}
 }

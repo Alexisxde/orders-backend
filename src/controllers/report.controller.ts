@@ -14,7 +14,7 @@ export async function getReportOrdersToMonth(req: Request, res: Response) {
 		res.status(200).json({ success: true, data, error: null })
 	} catch (e: unknown) {
 		const err = e as HttpError
-		res.status(err?.status || 500).json({ success: false, error: err?.message || "Internal Server Error" })
+		res.status(err?.status || 500).json({ success: false, error: err?.error || "Internal Server Error" })
 	}
 }
 
@@ -27,6 +27,6 @@ export async function getReportOrdersToDay(req: Request, res: Response) {
 		res.status(200).json({ success: true, data, error: null })
 	} catch (e: unknown) {
 		const err = e as HttpError
-		res.status(err?.status || 500).json({ success: false, error: err?.message || "Internal Server Error" })
+		res.status(err?.status || 500).json({ success: false, error: err?.error || "Internal Server Error" })
 	}
 }

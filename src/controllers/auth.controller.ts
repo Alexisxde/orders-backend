@@ -19,7 +19,7 @@ export async function registerUser(req: Request, res: Response) {
 		res.status(201).json({ success: true, data, error: null })
 	} catch (e: unknown) {
 		const err = e as HttpError
-		res.status(err?.status || 500).json({ success: false, error: err?.message || "Internal Server Error" })
+		res.status(err?.status || 500).json({ success: false, error: err?.error || "Internal Server Error" })
 	}
 }
 
@@ -54,7 +54,7 @@ export async function loginUser(req: Request, res: Response) {
 		res.status(200).json({ success: true, data, error: null })
 	} catch (e: unknown) {
 		const err = e as HttpError
-		res.status(err?.status || 500).json({ success: false, error: err?.message || "Internal Server Error" })
+		res.status(err?.status || 500).json({ success: false, error: err?.error || "Internal Server Error" })
 	}
 }
 
@@ -75,23 +75,23 @@ export async function logoutUser(_: Request, res: Response) {
 		res.status(200).json({ success: true, error: null })
 	} catch (e: unknown) {
 		const err = e as HttpError
-		res.status(err?.status || 500).json({ success: false, error: err?.message || "Internal Server Error" })
+		res.status(err?.status || 500).json({ success: false, error: err?.error || "Internal Server Error" })
 	}
 }
 
 export async function getCurrentUser(req: Request, res: Response) {
 	const token = req.cookies.token
 	try {
-		if (!token) throw { status: 401, message: "No hay token." }
+		if (!token) throw { status: 401, error: "No hay token." }
 		const decoded = jwt.verify(token, JWT_SECRET) as UserJWT
 		const user = await UserById(decoded._id)
-		if (!user) throw { status: 404, message: "Usuario no encontrado." }
+		if (!user) throw { status: 404, error: "Usuario no encontrado." }
 
 		const { password: _, ...data } = user
 		res.status(200).json({ success: true, data, error: null })
 	} catch (e: unknown) {
 		const err = e as HttpError
-		res.status(err?.status || 500).json({ success: false, error: err?.message || "Internal Server Error" })
+		res.status(err?.status || 500).json({ success: false, error: err?.error || "Internal Server Error" })
 	}
 }
 
@@ -99,7 +99,7 @@ export async function refresh(req: Request, res: Response) {
 	const refreshToken = req.cookies.refreshToken
 
 	try {
-		if (!refreshToken) throw { status: 401, message: "No hay refresh token." }
+		if (!refreshToken) throw { status: 401, error: "No hay refresh token." }
 		const decoded = jwt.verify(refreshToken, JWT_SECRET_REFRESHTOKEN) as UserJWT
 		const newToken = jwt.sign(decoded, JWT_SECRET, { expiresIn: "8h" })
 
@@ -113,6 +113,6 @@ export async function refresh(req: Request, res: Response) {
 		return res.status(200).json({ success: true, message: "Token renovado.", error: null })
 	} catch (e: unknown) {
 		const err = e as HttpError
-		res.status(err?.status || 500).json({ success: false, error: err?.message || "Internal Server Error" })
+		res.status(err?.status || 500).json({ success: false, error: err?.error || "Internal Server Error" })
 	}
 }

@@ -13,7 +13,12 @@ export async function insertImage({ id, url, user_id }: ImageCreate) {
 			image_id: result.image_id,
 			url: image.url
 		}
-	} catch (_) {}
+	} catch (_) {
+		throw {
+			status: 500,
+			error: "No se pudo guardar la información en la base de datos. Intente nuevamente más tarde."
+		}
+	}
 }
 
 export async function getImages(user_id: string) {

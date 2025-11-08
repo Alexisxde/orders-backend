@@ -15,7 +15,7 @@ export const createUser = async ({ name, email, password }: UserCreate) => {
 	} catch (_) {
 		throw {
 			status: 500,
-			message: "No se pudo guardar la información en la base de datos. Intente nuevamente más tarde."
+			error: "No se pudo guardar la información en la base de datos. Intente nuevamente más tarde."
 		}
 	}
 }
@@ -34,7 +34,7 @@ export const getUserByEmail = async (email: UserEmail) => {
 			.where(eq(UserTable.email, email))
 		return result[0]
 	} catch (_) {
-		throw { status: 500, message: "No se pudo obtener la información del usuario. Intente nuevamente más tarde." }
+		throw { status: 500, error: "No se pudo obtener la información del usuario. Intente nuevamente más tarde." }
 	}
 }
 
@@ -52,6 +52,6 @@ export const UserById = async (_id: UserId) => {
 			.where(eq(UserTable._id, _id))
 		return result[0]
 	} catch (_) {
-		throw { status: 500, message: "No se pudo obtener la información del usuario. Intente nuevamente más tarde." }
+		throw { status: 500, error: "No se pudo obtener la información del usuario. Intente nuevamente más tarde." }
 	}
 }

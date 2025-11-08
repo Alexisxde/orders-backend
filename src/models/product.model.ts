@@ -14,7 +14,7 @@ export async function insertProduct({ name, unit_price, description, image_id, u
 	} catch (_) {
 		throw {
 			status: 500,
-			message: "No se pudo guardar la información en la base de datos. Intente nuevamente más tarde."
+			error: "No se pudo guardar la información en la base de datos. Intente nuevamente más tarde."
 		}
 	}
 }
@@ -35,7 +35,7 @@ export async function getProducts(user_id: string) {
 			.leftJoin(ImagesTable, eq(ImagesTable._id, UserImagesTable.image_id))
 		return result
 	} catch (_) {
-		throw { status: 500, message: "No se pudo obtener la información de los productos. Intente nuevamente más tarde." }
+		throw { status: 500, error: "No se pudo obtener la información de los productos. Intente nuevamente más tarde." }
 	}
 }
 
@@ -55,6 +55,6 @@ export async function getProduct({ id, user_id }: { id: string; user_id: string 
 			.leftJoin(ImagesTable, eq(ImagesTable._id, UserImagesTable.image_id))
 		return result
 	} catch (_) {
-		throw { status: 500, message: "No se pudo obtener la información del producto. Intente nuevamente más tarde." }
+		throw { status: 500, error: "No se pudo obtener la información del producto. Intente nuevamente más tarde." }
 	}
 }
