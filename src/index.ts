@@ -5,6 +5,7 @@ import authRouter from "./routes/auth.route"
 import imageRouter from "./routes/image.route"
 import orderRouter from "./routes/order.route"
 import productRouter from "./routes/product.route"
+import reportRouter from "./routes/report.route"
 import { app, server } from "./server"
 
 app.get("/", (_, res) => {
@@ -16,6 +17,7 @@ app.use("/api/auth", authRouter)
 app.use("/api/products", verifySession, productRouter)
 app.use("/api/images", verifySession, imageRouter)
 app.use("/api/orders", verifySession, orderRouter)
+app.use("/api/report", verifySession, reportRouter)
 
 server.listen(PORT, () => {
 	// biome-ignore lint/suspicious/noConsole: Permitido para mirar el servidor.

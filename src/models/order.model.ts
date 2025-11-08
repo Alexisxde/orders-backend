@@ -1,8 +1,8 @@
-import { and, asc, count, desc, eq, gte, lte } from "drizzle-orm"
+import { and, asc, count, desc, eq, gte, lte, sql } from "drizzle-orm"
 import db from "../db/db"
 import { OrdersDetailsTable, OrdersTable } from "../db/schema"
 import { getProduct } from "../models/product.model"
-import type { InsertOrder, InsertOrderDetails, SelectOrders } from "../types/order"
+import type { InsertOrder, InsertOrderDetails, OrderStatus, SelectOrders } from "../types/order"
 import { orderSortByValues, orderStatusValues } from "../types/order"
 
 export async function insertOrder({ name, phone, payment_method, user_id, orders }: InsertOrder) {
@@ -83,10 +83,9 @@ export async function selectOrders({
 	if (status && orderStatusValues.includes(status)) conditions.push(eq(OrdersTable.status, status))
 	if (from && to) {
 		const regex = /^\d{4}-\d{2}-\d{2}$/
-		if (Number.isNaN(Date.parse(from)) || Number.isNaN(Date.parse(from)))
-			throw { status: 400, message: "Error al ingresar unas de las fechas." }
 		const dateValid = regex.test(from) && regex.test(to)
-		if (!dateValid) throw { status: 400, message: "Las fechas deben ter formato YYYY-MM-DD." }
+		if (!dateValid || Number.isNaN(Date.parse(from)) || Number.isNaN(Date.parse(from)))
+			throw { status: 400, message: "Las fechas deben tener formato YYYY-MM-DD." }
 
 		const targetFromDate = new Date(from)
 		const startOfDay = new Date(targetFromDate)
@@ -125,6 +124,87 @@ export async function selectOrders({
 		const pages = Math.ceil(total.count / limit)
 
 		return { page: page_number, pages, result }
+	} catch (_) {
+		throw {
+			status: 500,
+			message: "No se pudo obtener la información desde la base de datos. Intente nuevamente más tarde."
+		}
+	}
+}
+
+export async function selectOrdersToMonth({
+	year,
+	status = "delivered",
+	user_id
+}: {
+	year: string
+	status: OrderStatus
+	user_id: string
+}) {
+	if (!year) throw { status: 400, message: "Se necesita un año para obtener información." }
+
+	try {
+		const result = await db
+			.select({
+				month: sql`strftime('%m', ${OrdersTable.created_at})`.as("month"),
+				status: OrdersTable.status,
+				count: count()
+			})
+			.from(OrdersTable)
+			.where(
+				and(
+					eq(OrdersTable.user_id, user_id),
+					eq(sql`strftime('%Y', ${OrdersTable.created_at})`, year),
+					eq(OrdersTable.status, status)
+				)
+			)
+			.groupBy(sql`strftime('%m', ${OrdersTable.created_at})`)
+			.orderBy(sql`strftime('%m', ${OrdersTable.created_at})`)
+
+		return result
+	} catch (_) {
+		throw {
+			status: 500,
+			message: "No se pudo obtener la información desde la base de datos. Intente nuevamente más tarde."
+		}
+	}
+}
+
+export async function selectOrdersToDay({
+	date,
+	status = "delivered",
+	user_id
+}: {
+	date: string
+	status: OrderStatus
+	user_id: string
+}) {
+	if (!date) throw { status: 400, message: "Se necesita un año para obtener información." }
+	const regex = /^\d{4}-\d{2}-\d{2}$/
+	const dateValid = regex.test(date)
+	if (Number.isNaN(Date.parse(date)) || !dateValid)
+		throw { status: 400, message: "La fecha deben tener formato YYYY-MM-DD." }
+	const dateObj = new Date(date).toISOString().split("T")[0]
+
+	try {
+		const [result] = await db
+			.select({
+				date: sql`strftime('%Y-%m-%d', ${OrdersTable.created_at})`.as("date"),
+				status: OrdersTable.status,
+				count: count()
+			})
+			.from(OrdersTable)
+			.where(
+				and(
+					eq(OrdersTable.user_id, user_id),
+					eq(sql`strftime('%Y-%m-%d', ${OrdersTable.created_at})`, dateObj),
+					eq(OrdersTable.status, status)
+				)
+			)
+			.groupBy(sql`strftime('%m-%d', ${OrdersTable.created_at})`)
+			.orderBy(sql`strftime('%m-%d', ${OrdersTable.created_at})`)
+
+		return { date, status, count: result?.count ?? 0 }
 	} catch (_) {
 		throw {
 			status: 500,
