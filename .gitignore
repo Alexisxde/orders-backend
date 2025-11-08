@@ -3,3 +3,4 @@
 /migrations
 pnpm-lock.yaml
 .env
+*.db
