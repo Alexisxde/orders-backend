@@ -1,13 +1,15 @@
 import bcrypt from "bcrypt"
 import type { Request, Response } from "express"
 import jwt from "jsonwebtoken"
+import type { z } from "zod"
 import { JWT_SECRET, JWT_SECRET_REFRESHTOKEN, NODE_ENV } from "../config"
 import { createUser, getUserByEmail, UserById } from "../models/user.model"
+import type { userCreateBodySchema, userLoginBodySchema } from "../schemas/auth.schema"
 import type { UserJWT } from "../types/auth"
 import type { HttpError } from "../types/error"
 
 export async function registerUser(req: Request, res: Response) {
-	const { name, email, password } = req.body
+	const { name, email, password } = req.body as z.infer<typeof userCreateBodySchema>
 
 	try {
 		const existingUser = await getUserByEmail(email)
@@ -22,7 +24,7 @@ export async function registerUser(req: Request, res: Response) {
 }
 
 export async function loginUser(req: Request, res: Response) {
-	const { email, password } = req.body
+	const { email, password } = req.body as z.infer<typeof userLoginBodySchema>
 
 	try {
 		const user = await getUserByEmail(email)

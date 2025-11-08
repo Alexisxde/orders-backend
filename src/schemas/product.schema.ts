@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-export const productCreateSchema = z.object({
+export const productCreateBodySchema = z.object({
 	name: z
 		.string({
 			required_error: "El nombre del producto es obligatorio",
@@ -18,9 +18,5 @@ export const productCreateSchema = z.object({
 	image_id: z.string({
 		required_error: "La imagen es obligatoria",
 		invalid_type_error: "El ID de imagen debe ser una cadena de texto"
-	}),
-	user_id: z.string({
-		required_error: "El usuario es obligatorio",
-		invalid_type_error: "El ID de usuario debe ser una cadena de texto"
 	})
 })

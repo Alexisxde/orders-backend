@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { orderPaymentMethodValues, orderSortByValues, orderStatusValues } from "../types/order"
 
-export const orderCreateSchema = z.object({
+export const orderCreateBodySchema = z.object({
 	name: z
 		.string({ required_error: "El nombre es obligatorio.", invalid_type_error: "Debe ser un texto." })
 		.min(1, { message: "El nombre no puede estar vacío." }),
@@ -24,7 +24,12 @@ export const orderCreateSchema = z.object({
 		.min(1, { message: "Debe haber al menos un producto en la orden." })
 })
 
-export const orderSelectSchema = z
+export const orderSelectQuerySchema = z.object({
+	page: z.string().optional().default("1"),
+	limit: z.string().optional().default("15")
+})
+
+export const orderSelectBodySchema = z
 	.object({
 		status: z.enum(orderStatusValues, { errorMap: () => ({ message: "Estado invalido." }) }).optional(),
 		from: z.string().optional(),
@@ -33,9 +38,7 @@ export const orderSelectSchema = z
 			.enum(orderSortByValues, { errorMap: () => ({ message: "Ordenar By invalido." }) })
 			.optional()
 			.default("created_at"),
-		sort_order: z.enum(["asc", "desc"]).optional().default("desc"),
-		page: z.string().optional().default("1"),
-		limit: z.string().optional().default("15")
+		sort_order: z.enum(["asc", "desc"]).optional().default("desc")
 	})
 	.refine(
 		({ from, to }) => {
