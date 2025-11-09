@@ -1,6 +1,6 @@
 import { and, asc, count, desc, eq, gte, lte, sql } from "drizzle-orm"
 import db from "../db/db"
-import { OrdersDetailsTable, OrdersTable } from "../db/schema"
+import { OrdersDetailsTable, OrdersTable, ProductsTable } from "../db/schema"
 import { getProduct } from "../models/product.model"
 import type { InsertOrder, InsertOrderDetails, OrderStatus, SelectOrders } from "../types/order"
 import { orderSortByValues, orderStatusValues } from "../types/order"
@@ -146,10 +146,11 @@ export async function selectOrdersToMonth({
 			.select({
 				month: sql`strftime('%m', ${OrdersTable.created_at})`.as("month"),
 				status: OrdersTable.status,
-				count: count(),
-				total: sql`SUM(${OrdersTable.total})`.as("total")
+				total: sql`SUM(${OrdersDetailsTable.price} * ${OrdersDetailsTable.quantity})`.as("total"),
+				count: sql`SUM(${OrdersDetailsTable.quantity})`.as("count")
 			})
 			.from(OrdersTable)
+			.leftJoin(OrdersDetailsTable, eq(OrdersTable._id, OrdersDetailsTable.order_id))
 			.where(
 				and(
 					eq(OrdersTable.user_id, user_id),
@@ -183,10 +184,11 @@ export async function selectOrdersToDay({
 			.select({
 				date: sql`strftime('%Y-%m-%d', ${OrdersTable.created_at})`.as("date"),
 				status: OrdersTable.status,
-				total: sql`SUM(${OrdersTable.total})`.as("total"),
-				count: count()
+				total: sql`SUM(${OrdersDetailsTable.price} * ${OrdersDetailsTable.quantity})`.as("total"),
+				count: sql`SUM(${OrdersDetailsTable.quantity})`.as("count")
 			})
 			.from(OrdersTable)
+			.leftJoin(OrdersDetailsTable, eq(OrdersTable._id, OrdersDetailsTable.order_id))
 			.where(
 				and(
 					eq(OrdersTable.user_id, user_id),
@@ -206,7 +208,7 @@ export async function selectOrdersToDay({
 	}
 }
 
-export async function selectOrdersToClient({ user_id }: { user_id: string }) {
+export async function selectOrdersTopClients({ user_id }: { user_id: string }) {
 	try {
 		const result = await db
 			.select({
@@ -219,6 +221,29 @@ export async function selectOrdersToClient({ user_id }: { user_id: string }) {
 			.groupBy(OrdersTable.name)
 			.orderBy(desc(OrdersTable.total))
 			.limit(10)
+
+		return result
+	} catch (_) {
+		throw {
+			status: 500,
+			error: "No se pudo obtener la información desde la base de datos. Intente nuevamente más tarde."
+		}
+	}
+}
+
+export async function selectOrdersTopProducts({ user_id }: { user_id: string }) {
+	try {
+		const result = await db
+			.select({
+				product_name: ProductsTable.name,
+				quantity: sql`SUM(${OrdersDetailsTable.quantity})`.as("quantity")
+			})
+			.from(OrdersTable)
+			.leftJoin(OrdersDetailsTable, eq(OrdersTable._id, OrdersDetailsTable.order_id))
+			.leftJoin(ProductsTable, eq(OrdersDetailsTable.product_id, ProductsTable._id))
+			.where(and(eq(OrdersTable.user_id, user_id), eq(OrdersDetailsTable.product_id, ProductsTable._id)))
+			.groupBy(OrdersDetailsTable.product_id, ProductsTable.name)
+			.orderBy(desc(sql`SUM(${OrdersDetailsTable.quantity})`))
 
 		return result
 	} catch (_) {
