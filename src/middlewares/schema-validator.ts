@@ -23,22 +23,7 @@ export const schemaQuerysValidator =
 			return res.status(400).json({
 				success: false,
 				error: error.errors.map((err) => ({
-					field: err.path[0],
-					message: err.message
-				}))
-			})
-		}
-		next()
-	}
-
-export const schemaParamsValidator =
-	(schema: AnyZodObject | ZodEffects<AnyZodObject>) => (req: Request, res: Response, next: NextFunction) => {
-		const { success, error } = schema.safeParse(req.params)
-		if (!success) {
-			return res.status(400).json({
-				success: false,
-				error: error.errors.map((err) => ({
-					field: err.path[0],
+					param: err.path[0],
 					message: err.message
 				}))
 			})

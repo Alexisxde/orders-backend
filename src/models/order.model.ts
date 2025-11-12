@@ -132,15 +132,7 @@ export async function selectOrders({
 	}
 }
 
-export async function selectOrdersToMonth({
-	year,
-	status = "delivered",
-	user_id
-}: {
-	year: string
-	status: OrderStatus
-	user_id: string
-}) {
+export async function selectOrdersToMonth({ status = "delivered", user_id }: { status: OrderStatus; user_id: string }) {
 	try {
 		const result = await db
 			.select({
@@ -154,7 +146,8 @@ export async function selectOrdersToMonth({
 			.where(
 				and(
 					eq(OrdersTable.user_id, user_id),
-					eq(sql`strftime('%Y', ${OrdersTable.created_at})`, year),
+					gte(OrdersTable.created_at, sql`datetime('now', '-6 months')`),
+					// eq(sql`strftime('%Y', ${OrdersTable.created_at})`, year),
 					eq(OrdersTable.status, status)
 				)
 			)

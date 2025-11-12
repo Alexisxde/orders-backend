@@ -12,10 +12,10 @@ import type { HttpError } from "../types/error"
 
 export async function getReportOrdersToMonth(req: Request, res: Response) {
 	const { _id: user_id } = req.body.user as UserJWT
-	const { year, status } = req.query as z.infer<typeof orderSelectReportMonthQuerysSchema>
+	const { status } = req.query as z.infer<typeof orderSelectReportMonthQuerysSchema>
 
 	try {
-		const data = await selectOrdersToMonth({ year, status, user_id })
+		const data = await selectOrdersToMonth({ status, user_id })
 		res.status(200).json({ success: true, data, error: null })
 	} catch (e: unknown) {
 		const err = e as HttpError

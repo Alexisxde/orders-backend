@@ -2,9 +2,6 @@ import { z } from "zod"
 import { orderStatusValues } from "../types/order"
 
 export const orderSelectReportMonthQuerysSchema = z.object({
-	year: z
-		.string({ invalid_type_error: "Debe ser un texto." })
-		.regex(/^\d{4}$/, { message: "El formato del año es invalido. Use 'YYYY'." }),
 	status: z
 		.enum(orderStatusValues, { errorMap: () => ({ message: `Estados validos: ${orderStatusValues.join(", ")}` }) })
 		.default("delivered")
