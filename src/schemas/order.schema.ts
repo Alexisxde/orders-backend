@@ -51,11 +51,7 @@ export const orderSelectQuerySchema = z
 	})
 	.refine(
 		({ from, to }) => {
-			if (from && to) {
-				const fromDate = new Date(from).getTime()
-				const toDate = new Date(to).getTime()
-				return fromDate <= toDate
-			}
+			if (from && to) return new Date(from).getTime() <= new Date(to).getTime()
 			return true
 		},
 		{
