@@ -1,12 +1,13 @@
 import { Router } from "express"
 import { createOrder, getOrders } from "../controllers/order.controller"
 import { schemaBodyValidator, schemaQuerysValidator } from "../middlewares/schema-validator"
-import { orderCreateBodySchema, orderSelectBodySchema } from "../schemas/order.schema"
+import { orderCreateBodySchema, orderSelectQuerySchema } from "../schemas/order.schema"
 
 const router = Router()
 
-router.get("/", schemaQuerysValidator(orderSelectBodySchema), getOrders)
+router.get("/", schemaQuerysValidator(orderSelectQuerySchema), getOrders)
 router.post("/new", schemaBodyValidator(orderCreateBodySchema), createOrder)
-// router.put("/:id", updateOrder)
+// router.put("/:id", schemaBodyValidator(orderUpdateBodySchema), updateOrder)
+// router.delete("/:id", schemaBodyValidator(orderUpdateBodySchema), deleteOrder)
 
 export default router

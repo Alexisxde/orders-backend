@@ -8,8 +8,8 @@ const router = Router()
 router.get("/", selectProducts)
 router.get("/:id", selectIdProduct)
 router.post("/new", schemaBodyValidator(productCreateBodySchema), createProduct)
+// router.put("/:id", schemaBodyValidator(productUpdateBodySchema), updateProduct)
+// router.delete("/:id", schemaBodyValidator(productDeletedBodySchema), deleteProduct)
 // router.put("/:id/disabled", disableProduct)
-// router.put("/:id", updateProduct)
-// router.delete("/:id", deleteProduct)
 
 export default router

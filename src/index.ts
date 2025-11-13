@@ -12,7 +12,6 @@ app.get("/", (_, res) => {
 	res.status(200).json({ url: API_URL })
 })
 
-//* @router
 app.use("/api/auth", authRouter)
 app.use("/api/products", verifySession, productRouter)
 app.use("/api/images", verifySession, imageRouter)

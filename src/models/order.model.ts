@@ -82,11 +82,6 @@ export async function selectOrders({
 	if (!["asc", "desc"].includes(sort_order)) sort_order = "desc"
 	if (status && orderStatusValues.includes(status)) conditions.push(eq(OrdersTable.status, status))
 	if (from && to) {
-		const regex = /^\d{4}-\d{2}-\d{2}$/
-		const dateValid = regex.test(from) && regex.test(to)
-		if (!dateValid || Number.isNaN(Date.parse(from)) || Number.isNaN(Date.parse(from)))
-			throw { status: 400, error: "Las fechas deben tener formato YYYY-MM-DD." }
-
 		const targetFromDate = new Date(from)
 		const startOfDay = new Date(targetFromDate)
 		startOfDay.setHours(0, 0, 0, 0)

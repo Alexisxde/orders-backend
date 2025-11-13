@@ -24,21 +24,30 @@ export const orderCreateBodySchema = z.object({
 		.min(1, { message: "Debe haber al menos un producto en la orden." })
 })
 
-export const orderSelectQuerySchema = z.object({
-	page: z.string().optional().default("1"),
-	limit: z.string().optional().default("15")
-})
-
-export const orderSelectBodySchema = z
+export const orderSelectQuerySchema = z
 	.object({
-		status: z.enum(orderStatusValues, { errorMap: () => ({ message: "Estado invalido." }) }).optional(),
-		from: z.string().optional(),
-		to: z.string().optional(),
+		page: z.string().optional().default("1"),
+		limit: z.string().optional().default("15"),
+		status: z
+			.enum(orderStatusValues, { errorMap: () => ({ message: `Estados validos: ${orderStatusValues.join(", ")}` }) })
+			.optional()
+			.default("delivered"),
+		from: z
+			.string({ invalid_type_error: "Debe ser un texto." })
+			.regex(/^\d{4}-\d{2}-\d{2}$/, { message: "El formato de la fecha es invalido. Use YYYY-MM-DD." })
+			.optional(),
+		to: z
+			.string({ invalid_type_error: "Debe ser un texto." })
+			.regex(/^\d{4}-\d{2}-\d{2}$/, { message: "El formato de la fecha es invalido. Use YYYY-MM-DD." })
+			.optional(),
 		sort_by: z
-			.enum(orderSortByValues, { errorMap: () => ({ message: "Ordenar By invalido." }) })
+			.enum(orderSortByValues, { errorMap: () => ({ message: `Ordenar By validos: ${orderSortByValues.join(", ")}` }) })
 			.optional()
 			.default("created_at"),
-		sort_order: z.enum(["asc", "desc"]).optional().default("desc")
+		sort_order: z
+			.enum(["asc", "desc"], { errorMap: () => ({ message: `Ordenar validos: ${["asc", "desc"].join(", ")}` }) })
+			.optional()
+			.default("desc")
 	})
 	.refine(
 		({ from, to }) => {
