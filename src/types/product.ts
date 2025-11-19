@@ -1,12 +1,3 @@
-import type { ProductsTableType } from "../db/schema"
+import type { ProductsTableType as Product } from "../db/schema"
 
-export type Product = ProductsTableType
-export type ProductId = Product["_id"]
-
-export type InsertProduct = {
-	name: string
-	user_id: string
-	unit_price: string
-	description?: string | null
-	image_id: string
-}
+export type InsertProduct = Required<Pick<Product, "name" | "unit_price" | "description" | "image_id" | "user_id">>

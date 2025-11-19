@@ -15,3 +15,9 @@ export const orderSelectReportDayQuerysSchema = z.object({
 		.enum(orderStatusValues, { errorMap: () => ({ message: `Estados validos: ${orderStatusValues.join(", ")}` }) })
 		.default("delivered")
 })
+
+export const orderSelectReportSalesSchema = z.object({
+	date: z
+		.string({ invalid_type_error: "Debe ser un texto." })
+		.regex(/^\d{4}-\d{2}-\d{2}$/, { message: "El formato de la fecha es invalido. Use YYYY-MM-DD." })
+})

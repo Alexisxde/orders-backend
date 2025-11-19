@@ -1,7 +1,12 @@
 import { z } from "zod"
 
 export const imageUploadBodySchema = z.object({
-	name: z
-		.string({ required_error: "El nombre es obligatorio.", invalid_type_error: "El nombre debe ser un texto." })
-		.min(2, { message: "El nombre debe tener al menos 2 caracteres." })
+	image: z
+		.instanceof(File)
+		.refine((file: File) => file.size <= 5 * 1024 * 1024, {
+			message: "La imagen debe pesar máximo 5MB"
+		})
+		.refine((file) => ["image/png", "image/jpeg", "image/webp"].includes(file.type), {
+			message: "Formato inválido, solo se permiten PNG, JPG o WEBP"
+		})
 })

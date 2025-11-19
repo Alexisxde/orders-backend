@@ -173,7 +173,7 @@ export async function selectOrdersToDay({
 				date: sql`strftime('%Y-%m-%d', ${OrdersTable.created_at})`.as("date"),
 				status: OrdersTable.status,
 				total: sql`SUM(${OrdersDetailsTable.price} * ${OrdersDetailsTable.quantity})`.as("total"),
-				count: sql`SUM(${OrdersDetailsTable.quantity})`.as("count")
+				quantity: sql`SUM(${OrdersDetailsTable.quantity})`.as("quantity")
 			})
 			.from(OrdersTable)
 			.leftJoin(OrdersDetailsTable, eq(OrdersTable._id, OrdersDetailsTable.order_id))
@@ -187,7 +187,7 @@ export async function selectOrdersToDay({
 			.groupBy(sql`strftime('%m-%d', ${OrdersTable.created_at})`)
 			.orderBy(sql`strftime('%m-%d', ${OrdersTable.created_at})`)
 
-		return { date, status, total: result?.total ?? 0, count: result?.count ?? 0 }
+		return { date, status, total: result?.total ?? 0, quantity: result?.quantity ?? 0 }
 	} catch (_) {
 		throw {
 			status: 500,
@@ -202,9 +202,10 @@ export async function selectOrdersTopClients({ user_id }: { user_id: string }) {
 			.select({
 				client: OrdersTable.name,
 				total: sql`SUM(${OrdersTable.total})`.as("total"),
-				count: count()
+				quantity: sql`SUM(${OrdersDetailsTable.quantity})`.as("quantity")
 			})
 			.from(OrdersTable)
+			.leftJoin(OrdersDetailsTable, eq(OrdersTable._id, OrdersDetailsTable.order_id))
 			.where(and(eq(OrdersTable.user_id, user_id), eq(OrdersTable.status, "delivered")))
 			.groupBy(OrdersTable.name)
 			.orderBy(desc(OrdersTable.total))
@@ -229,11 +230,46 @@ export async function selectOrdersTopProducts({ user_id }: { user_id: string }) 
 			.from(OrdersTable)
 			.leftJoin(OrdersDetailsTable, eq(OrdersTable._id, OrdersDetailsTable.order_id))
 			.leftJoin(ProductsTable, eq(OrdersDetailsTable.product_id, ProductsTable._id))
-			.where(and(eq(OrdersTable.user_id, user_id), eq(OrdersDetailsTable.product_id, ProductsTable._id)))
+			.where(
+				and(
+					eq(OrdersTable.user_id, user_id),
+					eq(OrdersTable.status, "delivered"),
+					eq(OrdersDetailsTable.product_id, ProductsTable._id)
+				)
+			)
 			.groupBy(OrdersDetailsTable.product_id, ProductsTable.name)
 			.orderBy(desc(sql`SUM(${OrdersDetailsTable.quantity})`))
+			.limit(5)
 
 		return result
+	} catch (_) {
+		throw {
+			status: 500,
+			error: "No se pudo obtener la información desde la base de datos. Intente nuevamente más tarde."
+		}
+	}
+}
+
+export async function selectOrdersSales({ date, user_id }: { date: string; user_id: string }) {
+	try {
+		const [result] = await db
+			.select({
+				date: sql`strftime('%Y-%m-%d', ${OrdersTable.created_at})`.as("date"),
+				total: sql`SUM(${OrdersDetailsTable.price} * ${OrdersDetailsTable.quantity})`.as("total"),
+				quantity: sql`SUM(${OrdersDetailsTable.quantity})`.as("quantity")
+			})
+			.from(OrdersTable)
+			.leftJoin(OrdersDetailsTable, eq(OrdersTable._id, OrdersDetailsTable.order_id))
+			.where(
+				and(
+					eq(OrdersTable.user_id, user_id),
+					eq(sql`strftime('%Y-%m-%d', ${OrdersTable.created_at})`, date),
+					eq(OrdersTable.status, "delivered")
+				)
+			)
+			.groupBy(sql`strftime('%m-%d', ${OrdersTable.created_at})`)
+
+		return { date, total: result?.total ?? 0, quantity: result?.quantity ?? 0 }
 	} catch (_) {
 		throw {
 			status: 500,

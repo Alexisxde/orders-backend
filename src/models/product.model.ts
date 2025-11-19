@@ -3,7 +3,13 @@ import db from "../db/db"
 import { ImagesTable, ProductsTable, UserImagesTable } from "../db/schema"
 import type { InsertProduct } from "../types/product"
 
-export async function insertProduct({ name, unit_price, description, image_id, user_id }: InsertProduct) {
+export async function insertProduct({
+	name,
+	unit_price,
+	description = "Sin observaciones",
+	image_id = null,
+	user_id
+}: InsertProduct) {
 	const _id = crypto.randomUUID()
 	try {
 		const [result] = await db

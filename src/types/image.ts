@@ -1,14 +1,3 @@
-import type { ImagesTableType, UserImagesTableType } from "../db/schema"
+import type { ImagesTableType as Image, UserImagesTableType as UserImage } from "../db/schema"
 
-export type Image = ImagesTableType
-export type UserImage = UserImagesTableType
-export type ImageId = Image["_id"]
-export type ImageUrl = Image["url"]
-export type ImageUserId = UserImage["user_id"]
-
-export interface ImageCreate {
-	id: ImageId
-	// name: UserName
-	url: ImageUrl
-	user_id: ImageUserId
-}
+export type InsertImage = Required<Pick<Image, "_id" | "url"> & Pick<UserImage, "user_id">>

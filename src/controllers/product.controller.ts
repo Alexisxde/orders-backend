@@ -4,12 +4,16 @@ import { getProduct, getProducts, insertProduct } from "../models/product.model"
 import type { productCreateBodySchema } from "../schemas/product.schema"
 import type { UserJWT } from "../types/auth"
 import type { HttpError } from "../types/error"
+import { postImage } from "./image.controller"
 
 export async function createProduct(req: Request, res: Response) {
 	const { _id: user_id } = req.body.user as UserJWT
-	const { name, price, description, image_id } = req.body as z.infer<typeof productCreateBodySchema>
+	const { name, price, description } = req.body as z.infer<typeof productCreateBodySchema>
+	const file = req.file
 
 	try {
+		if (!file) throw { status: 400, error: [{ field: "file", message: "La imagen del producto es obligatorio." }] }
+		const { _id: image_id } = await postImage({ file, user_id })
 		const data = await insertProduct({ name, unit_price: price.toString(), description, image_id, user_id })
 		res.status(201).json({ success: true, data, error: null })
 	} catch (e: unknown) {

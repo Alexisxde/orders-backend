@@ -1,12 +1,17 @@
 import type { Request, Response } from "express"
 import type { z } from "zod"
 import {
+	selectOrdersSales,
 	selectOrdersToDay,
 	selectOrdersToMonth,
 	selectOrdersTopClients,
 	selectOrdersTopProducts
 } from "../models/order.model"
-import type { orderSelectReportDayQuerysSchema, orderSelectReportMonthQuerysSchema } from "../schemas/report.schema"
+import type {
+	orderSelectReportDayQuerysSchema,
+	orderSelectReportMonthQuerysSchema,
+	orderSelectReportSalesSchema
+} from "../schemas/report.schema"
 import type { UserJWT } from "../types/auth"
 import type { HttpError } from "../types/error"
 
@@ -53,6 +58,19 @@ export async function getReportOrdersTopProducts(req: Request, res: Response) {
 
 	try {
 		const data = await selectOrdersTopProducts({ user_id })
+		res.status(200).json({ success: true, data, error: null })
+	} catch (e: unknown) {
+		const err = e as HttpError
+		res.status(err?.status || 500).json({ success: false, error: err?.error || "Internal Server Error" })
+	}
+}
+
+export async function getReportOrdersSales(req: Request, res: Response) {
+	const { _id: user_id } = req.body.user as UserJWT
+	const { date } = req.query as z.infer<typeof orderSelectReportSalesSchema>
+
+	try {
+		const data = await selectOrdersSales({ date, user_id })
 		res.status(200).json({ success: true, data, error: null })
 	} catch (e: unknown) {
 		const err = e as HttpError
