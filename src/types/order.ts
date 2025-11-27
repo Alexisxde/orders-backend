@@ -9,8 +9,10 @@ export type OrderStatus = (typeof orderStatusValues)[number]
 export type OrderSortBy = (typeof orderSortByValues)[number]
 export type OrderSort = "asc" | "desc"
 
-export type InsertOrder = Required<Pick<Order, "name" | "phone" | "payment_method" | "user_id">>
 export type InsertOrderDetails = Required<Pick<OrderDetails, "product_id" | "quantity" | "price" | "observation">>
+export type InsertOrder = Required<Pick<Order, "name" | "phone" | "payment_method" | "user_id">> & {
+	orders: Omit<InsertOrderDetails, "price">[]
+}
 export type SelectOrders = Required<Pick<Order, "user_id">> & {
 	page?: string
 	per_page?: string

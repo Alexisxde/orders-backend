@@ -22,7 +22,7 @@ export async function insertOrder({ name, phone, payment_method, user_id, orders
 
 			orderDetailsData.push({
 				product_id: order.product_id,
-				price: unit_price,
+				price: unit_price.toString(),
 				quantity: order.quantity,
 				observation: order.observation
 			})
@@ -127,14 +127,14 @@ export async function selectOrders({
 	}
 }
 
-export async function selectOrdersToMonth({ status = "delivered", user_id }: { status: OrderStatus; user_id: string }) {
+export async function selectOrders6Month({ status = "delivered", user_id }: { status: OrderStatus; user_id: string }) {
 	try {
 		const result = await db
 			.select({
 				month: sql`strftime('%m', ${OrdersTable.created_at})`.as("month"),
 				status: OrdersTable.status,
 				total: sql`SUM(${OrdersDetailsTable.price} * ${OrdersDetailsTable.quantity})`.as("total"),
-				count: sql`SUM(${OrdersDetailsTable.quantity})`.as("count")
+				quantity: sql`SUM(${OrdersDetailsTable.quantity})`.as("quantity")
 			})
 			.from(OrdersTable)
 			.leftJoin(OrdersDetailsTable, eq(OrdersTable._id, OrdersDetailsTable.order_id))
@@ -142,7 +142,6 @@ export async function selectOrdersToMonth({ status = "delivered", user_id }: { s
 				and(
 					eq(OrdersTable.user_id, user_id),
 					gte(OrdersTable.created_at, sql`datetime('now', '-6 months')`),
-					// eq(sql`strftime('%Y', ${OrdersTable.created_at})`, year),
 					eq(OrdersTable.status, status)
 				)
 			)
@@ -250,11 +249,22 @@ export async function selectOrdersTopProducts({ user_id }: { user_id: string }) 
 	}
 }
 
-export async function selectOrdersSales({ date, user_id }: { date: string; user_id: string }) {
+export async function selectOrdersToMonth({
+	status = "delivered",
+	month,
+	year = "2025",
+	user_id
+}: {
+	status: OrderStatus
+	month: string
+	year: string
+	user_id: string
+}) {
 	try {
 		const [result] = await db
 			.select({
-				date: sql`strftime('%Y-%m-%d', ${OrdersTable.created_at})`.as("date"),
+				month: sql`strftime('%m', ${OrdersTable.created_at})`.as("month"),
+				status: OrdersTable.status,
 				total: sql`SUM(${OrdersDetailsTable.price} * ${OrdersDetailsTable.quantity})`.as("total"),
 				quantity: sql`SUM(${OrdersDetailsTable.quantity})`.as("quantity")
 			})
@@ -263,13 +273,15 @@ export async function selectOrdersSales({ date, user_id }: { date: string; user_
 			.where(
 				and(
 					eq(OrdersTable.user_id, user_id),
-					eq(sql`strftime('%Y-%m-%d', ${OrdersTable.created_at})`, date),
-					eq(OrdersTable.status, "delivered")
+					eq(sql`strftime('%m', ${OrdersTable.created_at})`, month),
+					eq(sql`strftime('%Y', ${OrdersTable.created_at})`, year),
+					eq(OrdersTable.status, status)
 				)
 			)
-			.groupBy(sql`strftime('%m-%d', ${OrdersTable.created_at})`)
+			.groupBy(sql`strftime('%m', ${OrdersTable.created_at})`)
+			.orderBy(sql`strftime('%m', ${OrdersTable.created_at})`)
 
-		return { date, total: result?.total ?? 0, quantity: result?.quantity ?? 0 }
+		return { month, total: result?.total ?? 0, quantity: result?.quantity ?? 0, year }
 	} catch (_) {
 		throw {
 			status: 500,

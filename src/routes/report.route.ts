@@ -1,6 +1,6 @@
 import { Router } from "express"
 import {
-	getReportOrdersSales,
+	getReportOrders6Month,
 	getReportOrdersToDay,
 	getReportOrdersToMonth,
 	getReportOrdersTopClients,
@@ -10,15 +10,15 @@ import { schemaQuerysValidator } from "../middlewares/schema-validator"
 import {
 	orderSelectReportDayQuerysSchema,
 	orderSelectReportMonthQuerysSchema,
-	orderSelectReportSalesSchema
+	orderSelectReportToMonthQuerysSchema
 } from "../schemas/report.schema"
 
 const router = Router()
 
-router.get("/month", schemaQuerysValidator(orderSelectReportMonthQuerysSchema), getReportOrdersToMonth)
+router.get("/6month", schemaQuerysValidator(orderSelectReportMonthQuerysSchema), getReportOrders6Month)
+router.get("/month", schemaQuerysValidator(orderSelectReportToMonthQuerysSchema), getReportOrdersToMonth)
 router.get("/day", schemaQuerysValidator(orderSelectReportDayQuerysSchema), getReportOrdersToDay)
 router.get("/clients", getReportOrdersTopClients)
 router.get("/products", getReportOrdersTopProducts)
-router.get("/sales", schemaQuerysValidator(orderSelectReportSalesSchema), getReportOrdersSales)
 
 export default router

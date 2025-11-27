@@ -5,7 +5,7 @@ export const orderCreateBodySchema = z.object({
 	name: z
 		.string({ required_error: "El nombre es obligatorio.", invalid_type_error: "Debe ser un texto." })
 		.min(1, { message: "El nombre no puede estar vacío." }),
-	phone: z.string().nullable().optional(),
+	phone: z.string().optional().default("-"),
 	payment_method: z.enum(orderPaymentMethodValues, { errorMap: () => ({ message: "Metodo de pago invalido." }) }),
 	orders: z
 		.array(
@@ -18,7 +18,7 @@ export const orderCreateBodySchema = z.object({
 					.number({ required_error: "La cantidad es obligatoria.", invalid_type_error: "Debe ser un número." })
 					.int()
 					.positive(),
-				observation: z.string().optional()
+				observation: z.string().optional().default("Sin observaciones.")
 			})
 		)
 		.min(1, { message: "Debe haber al menos un producto en la orden." })

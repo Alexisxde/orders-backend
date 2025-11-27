@@ -2,7 +2,7 @@ import bcrypt from "bcrypt"
 import { eq } from "drizzle-orm"
 import db from "../db/db"
 import { UserTable } from "../db/schema"
-import type { UserCreate, UserEmail, UserId } from "../types/auth"
+import type { UserCreate } from "../types/auth"
 
 export const createUser = async ({ name, email, password }: UserCreate) => {
 	const SALT = 10
@@ -20,7 +20,7 @@ export const createUser = async ({ name, email, password }: UserCreate) => {
 	}
 }
 
-export const getUserByEmail = async (email: UserEmail) => {
+export const getUserByEmail = async (email: string) => {
 	try {
 		const result = await db
 			.select({
@@ -38,7 +38,7 @@ export const getUserByEmail = async (email: UserEmail) => {
 	}
 }
 
-export const UserById = async (_id: UserId) => {
+export const UserById = async (_id: string) => {
 	try {
 		const result = await db
 			.select({
