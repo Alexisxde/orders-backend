@@ -15,8 +15,15 @@ export async function insertProduct({
 		const [result] = await db
 			.insert(ProductsTable)
 			.values({ _id, name, unit_price, description, image_id, user_id })
-			.returning()
-		return result
+			.returning({
+				_id: ProductsTable._id,
+				name: ProductsTable.name,
+				price: ProductsTable.unit_price,
+				description: ProductsTable.description,
+				disabled: ProductsTable.disabled
+			})
+
+		return { ...result, disabled: result.disabled === "true" }
 	} catch (_) {
 		throw {
 			status: 500,
@@ -32,6 +39,7 @@ export async function getProducts(user_id: string) {
 				_id: ProductsTable._id,
 				name: ProductsTable.name,
 				price: ProductsTable.unit_price,
+				disabled: ProductsTable.disabled,
 				description: ProductsTable.description,
 				image: ImagesTable.url
 			})
@@ -39,7 +47,7 @@ export async function getProducts(user_id: string) {
 			.where(eq(ProductsTable.user_id, user_id))
 			.leftJoin(UserImagesTable, eq(UserImagesTable._id, ProductsTable.image_id))
 			.leftJoin(ImagesTable, eq(ImagesTable._id, UserImagesTable.image_id))
-		return result
+		return result.map((product) => ({ ...product, disabled: product.disabled === "true" }))
 	} catch (_) {
 		throw { status: 500, error: "No se pudo obtener la información de los productos. Intente nuevamente más tarde." }
 	}
