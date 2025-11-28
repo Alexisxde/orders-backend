@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt"
 import { eq } from "drizzle-orm"
 import db from "../db/db"
-import { UserTable } from "../db/schema"
+import { ImagesTable, UserTable } from "../db/schema"
 import type { UserCreate } from "../types/auth"
 
 export const createUser = async ({ name, email, password }: UserCreate) => {
@@ -46,10 +46,12 @@ export const UserById = async (_id: string) => {
 				name: UserTable.name,
 				email: UserTable.email,
 				password: UserTable.password,
-				role: UserTable.role
+				role: UserTable.role,
+				avatar: ImagesTable.url
 			})
 			.from(UserTable)
 			.where(eq(UserTable._id, _id))
+			.leftJoin(ImagesTable, eq(UserTable.id_avatar, ImagesTable._id))
 		return result[0]
 	} catch (_) {
 		throw { status: 500, error: "No se pudo obtener la información del usuario. Intente nuevamente más tarde." }
