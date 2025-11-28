@@ -9,7 +9,7 @@ import reportRouter from "./routes/report.route"
 import { app, server } from "./server"
 
 app.get("/", (_, res) => {
-	res.status(200).json({ url: API_URL })
+	res.status(200).json({ url: `${API_URL}:${PORT}`, status: "API is running" })
 })
 
 app.use("/api/auth", authRouter)
@@ -20,5 +20,5 @@ app.use("/api/reports", verifySession, reportRouter)
 
 server.listen(PORT, () => {
 	// biome-ignore lint/suspicious/noConsole: Permitido para mirar el servidor.
-	console.log(`[server]: http://localhost:${PORT}`)
+	console.log(`[server]: ${API_URL}:${PORT}`)
 })

@@ -40,13 +40,13 @@ export async function loginUser(req: Request, res: Response) {
 		res.cookie("token", token, {
 			httpOnly: true,
 			secure: NODE_ENV === "production",
-			sameSite: "lax",
+			sameSite: "none",
 			maxAge: 6 * 60 * 60 * 1000
 		})
 		res.cookie("refreshToken", refreshToken, {
 			httpOnly: true,
 			secure: NODE_ENV === "production",
-			sameSite: "lax",
+			sameSite: "none",
 			maxAge: 7 * 24 * 60 * 60 * 1000
 		})
 
@@ -63,13 +63,13 @@ export async function logoutUser(_: Request, res: Response) {
 		res.clearCookie("token", {
 			httpOnly: true,
 			secure: NODE_ENV === "production",
-			sameSite: "lax"
+			sameSite: "none"
 		})
 
 		res.clearCookie("refreshToken", {
 			httpOnly: true,
 			secure: NODE_ENV === "production",
-			sameSite: "lax"
+			sameSite: "none"
 		})
 
 		res.status(200).json({ success: true, error: null })
