@@ -3,6 +3,7 @@ import * as t from "drizzle-orm/sqlite-core"
 import { sqliteTable as table } from "drizzle-orm/sqlite-core"
 import { userRoleValues } from "../types/auth"
 import { orderPaymentMethodValues, orderStatusValues } from "../types/order"
+import { productsCategoriesValues } from "../types/product"
 
 export const UserTable = table(
 	"users",
@@ -67,6 +68,7 @@ export const ProductsTable = table(
 		_id: t.text("_id").primaryKey().notNull(),
 		name: t.text("name").notNull(),
 		unit_price: t.numeric("unit_price").notNull(),
+		category: t.text("category", { enum: productsCategoriesValues }).default("others").notNull(),
 		description: t.text("description").default("Sin descripción.").notNull(),
 		disabled: t
 			.text("disabled", { enum: ["true", "false"] })

@@ -1,7 +1,7 @@
 import type { OrdersTableType as Order, OrdersDetailsTableType as OrderDetails } from "../db/schema"
-// cash: "Efectivo", transfer: "Transferencia", mercado_pago: "Mercado Pago",
+// cash: "Efectivo", other: "Otro", mercado_pago: "Mercado Pago",
 // on_hold: "En espera", delivered: "Entregado", cancelled: "Cancelado", deleted: "Eliminado"
-export const orderPaymentMethodValues = ["cash", "transfer", "mercado_pago"] as const
+export const orderPaymentMethodValues = ["cash", "mercado_pago", "other"] as const
 export const orderStatusValues = ["delivered", "on_hold", "deleted", "cancelled"] as const
 export const orderSortByValues = ["created_at", "total", "status"] as const
 export type OrderPaymentMethod = (typeof orderPaymentMethodValues)[number]

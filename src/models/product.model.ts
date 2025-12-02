@@ -6,6 +6,7 @@ import type { InsertProduct } from "../types/product"
 export async function insertProduct({
 	name,
 	unit_price,
+	category,
 	description = "Sin observaciones",
 	image_id = null,
 	user_id
@@ -14,7 +15,7 @@ export async function insertProduct({
 	try {
 		const [result] = await db
 			.insert(ProductsTable)
-			.values({ _id, name, unit_price, description, image_id, user_id })
+			.values({ _id, name, unit_price, category, description, image_id, user_id })
 			.returning({
 				_id: ProductsTable._id,
 				name: ProductsTable.name,

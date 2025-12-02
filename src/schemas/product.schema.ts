@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { productsCategoriesValues } from "../types/product"
 
 export const productCreateBodySchema = z.object({
 	name: z
@@ -15,5 +16,6 @@ export const productCreateBodySchema = z.object({
 		.string({ required_error: "El precio es obligatorio", invalid_type_error: "El precio debe ser un string" })
 		.transform((val) => Number(val))
 		.refine((val) => !Number.isNaN(val), { message: "El precio debe ser un número válido." })
-		.refine((val) => val >= 0, { message: "El precio no puede ser negativo." })
+		.refine((val) => val >= 0, { message: "El precio no puede ser negativo." }),
+	category: z.enum(productsCategoriesValues, { errorMap: () => ({ message: "Categoria invalida." }) })
 })

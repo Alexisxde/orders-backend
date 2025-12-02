@@ -8,13 +8,20 @@ import { postImage } from "./image.controller"
 
 export async function createProduct(req: Request, res: Response) {
 	const { _id: user_id } = req.body.user as UserJWT
-	const { name, price, description } = req.body as z.infer<typeof productCreateBodySchema>
+	const { name, price, category, description } = req.body as z.infer<typeof productCreateBodySchema>
 	const file = req.file
 
 	try {
 		if (!file) throw { status: 400, error: [{ field: "file", message: "La imagen del producto es obligatorio." }] }
 		const { _id: image_id } = await postImage({ file, user_id })
-		const data = await ProductModel.insert({ name, unit_price: price.toString(), description, image_id, user_id })
+		const data = await ProductModel.insert({
+			name,
+			unit_price: price.toString(),
+			category,
+			description,
+			image_id,
+			user_id
+		})
 		res.status(201).json({ success: true, data, error: null })
 	} catch (e: unknown) {
 		const err = e as HttpError
