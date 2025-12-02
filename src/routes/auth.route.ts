@@ -8,7 +8,7 @@ const router = Router()
 
 router.post("/register", schemaBodyValidator(userCreateBodySchema), AuthController.register)
 router.post("/login", schemaBodyValidator(userLoginBodySchema), AuthController.login)
-router.post("/update", verifySession, schemaBodyValidator(userUpdateBodySchema), AuthController.update)
+router.put("/update", verifySession, schemaBodyValidator(userUpdateBodySchema), AuthController.update)
 router.post("/logout", AuthController.logout)
 router.post("/refresh", AuthController.refresh)
 router.get("/user", verifySession, AuthController.user)

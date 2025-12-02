@@ -2,6 +2,7 @@ import { and, asc, count, desc, eq, gte, lte, sql } from "drizzle-orm"
 import db from "../db/db"
 import { OrdersDetailsTable, OrdersTable, ProductsTable } from "../db/schema"
 import { getProduct } from "../models/product.model"
+import type { HttpError } from "../types/error"
 import type { InsertOrder, InsertOrderDetails, OrderStatus, SelectOrders } from "../types/order"
 import { orderSortByValues, orderStatusValues } from "../types/order"
 
@@ -52,10 +53,11 @@ export async function insertOrder({ name, phone, payment_method, user_id, orders
 		)
 		await Promise.all(detailInserts)
 		return { result, details: orderDetailsData }
-	} catch (_) {
+	} catch (e: unknown) {
+		const err = e as HttpError
 		throw {
-			status: 500,
-			error: "No se pudo guardar la información en la base de datos. Intente nuevamente más tarde."
+			status: err?.status || 500,
+			error: err?.error || "No se pudo guardar la información en la base de datos. Intente nuevamente más tarde."
 		}
 	}
 }

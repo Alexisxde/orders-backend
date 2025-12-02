@@ -37,7 +37,12 @@ export async function getImages(user_id: string) {
 			.where(eq(UserImagesTable.user_id, user_id))
 			.leftJoin(ImagesTable, eq(ImagesTable._id, UserImagesTable.image_id))
 		return result
-	} catch (_) {}
+	} catch (_) {
+		throw {
+			status: 500,
+			error: "No se pudo obtener la información desde base de datos. Intente nuevamente más tarde."
+		}
+	}
 }
 
 export async function getImageProfile(user_id: string) {
@@ -48,5 +53,10 @@ export async function getImageProfile(user_id: string) {
 			.where(eq(UserTable._id, user_id))
 			.leftJoin(ImagesTable, eq(ImagesTable._id, UserTable.id_avatar))
 		return result[0]
-	} catch (_) {}
+	} catch (_) {
+		throw {
+			status: 500,
+			error: "No se pudo obtener la información desde base de datos. Intente nuevamente más tarde."
+		}
+	}
 }
