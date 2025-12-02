@@ -20,6 +20,7 @@ export async function insertProduct({
 				_id: ProductsTable._id,
 				name: ProductsTable.name,
 				price: ProductsTable.unit_price,
+				category: ProductsTable.category,
 				description: ProductsTable.description,
 				disabled: ProductsTable.disabled
 			})
@@ -40,6 +41,7 @@ export async function getProducts(user_id: string) {
 				_id: ProductsTable._id,
 				name: ProductsTable.name,
 				price: ProductsTable.unit_price,
+				category: ProductsTable.category,
 				disabled: ProductsTable.disabled,
 				description: ProductsTable.description,
 				image: ImagesTable.url
@@ -61,6 +63,7 @@ export async function getProduct({ id, user_id }: { id: string; user_id: string 
 				_id: ProductsTable._id,
 				name: ProductsTable.name,
 				price: ProductsTable.unit_price,
+				category: ProductsTable.category,
 				description: ProductsTable.description,
 				image: ImagesTable.url
 			})
