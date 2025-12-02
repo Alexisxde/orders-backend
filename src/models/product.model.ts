@@ -72,3 +72,5 @@ export async function getProduct({ id, user_id }: { id: string; user_id: string 
 		throw { status: 500, error: "No se pudo obtener la información del producto. Intente nuevamente más tarde." }
 	}
 }
+
+export default { insert: insertProduct, get: getProducts, getById: getProduct }
