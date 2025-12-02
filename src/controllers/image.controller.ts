@@ -44,3 +44,5 @@ export async function postOneImage({ file }: { file: Express.Multer.File }) {
 		throw { status: 500, error: "Error uploading file." }
 	}
 }
+
+export default { insertOne: postOneImage, insert: postImage, getAll: getAllImages }

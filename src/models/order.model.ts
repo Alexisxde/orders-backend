@@ -289,3 +289,5 @@ export async function selectOrdersToMonth({
 		}
 	}
 }
+
+export default { select: selectOrders, insert: insertOrder, update: null }
