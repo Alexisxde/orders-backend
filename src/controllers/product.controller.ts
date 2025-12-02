@@ -1,19 +1,19 @@
 import type { Request, Response } from "express"
 import type { z } from "zod"
 import ProductModel from "../models/product.model"
-import type { productCreateBodySchema } from "../schemas/product.schema"
+import type ProductShema from "../schemas/product.schema"
 import type { UserJWT } from "../types/auth"
 import type { HttpError } from "../types/error"
-import { postImage } from "./image.controller"
+import ImageController from "./image.controller"
 
 export async function createProduct(req: Request, res: Response) {
 	const { _id: user_id } = req.body.user as UserJWT
-	const { name, price, category, description } = req.body as z.infer<typeof productCreateBodySchema>
+	const { name, price, category, description } = req.body as z.infer<typeof ProductShema.create>
 	const file = req.file
 
 	try {
 		if (!file) throw { status: 400, error: [{ field: "file", message: "La imagen del producto es obligatorio." }] }
-		const { _id: image_id } = await postImage({ file, user_id })
+		const { _id: image_id } = await ImageController.insert({ file, user_id })
 		const data = await ProductModel.insert({
 			name,
 			unit_price: price.toString(),
@@ -54,4 +54,32 @@ export async function selectIdProduct(req: Request, res: Response) {
 	}
 }
 
-export default { create: createProduct, get: selectProducts, getById: selectIdProduct }
+export async function updateProduct(req: Request, res: Response) {
+	const { _id: user_id } = req.body.user as UserJWT
+	const { id } = req.params as { id: string }
+	const { name, category, price, description, disabled } = req.body as z.infer<typeof ProductShema.update>
+
+	try {
+		if (!name && !category && !price && !description && !disabled)
+			throw {
+				status: 400,
+				error: "Para actualizar se necesitan algunos de estos campos. (name, category, price, description, disabled)"
+			}
+
+		const data = await ProductModel.update({
+			_id: id,
+			name,
+			category,
+			unit_price: price?.toString(),
+			description,
+			disabled: disabled?.toString() as "true" | "false" | undefined,
+			user_id
+		})
+		res.status(200).json({ success: true, data, error: null })
+	} catch (e: unknown) {
+		const err = e as HttpError
+		res.status(err?.status || 500).json({ success: false, error: err?.error || "Internal Server Error" })
+	}
+}
+
+export default { create: createProduct, get: selectProducts, getById: selectIdProduct, update: updateProduct }

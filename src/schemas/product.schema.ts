@@ -19,3 +19,21 @@ export const productCreateBodySchema = z.object({
 		.refine((val) => val >= 0, { message: "El precio no puede ser negativo." }),
 	category: z.enum(productsCategoriesValues, { errorMap: () => ({ message: "Categoria invalida." }) })
 })
+
+export const productUpdateBodySchema = z.object({
+	name: z.string().min(1, { message: "El nombre no puede estar vacío." }).optional(),
+	description: z.string().min(1, { message: "La descripción no puede estar vacío." }).optional(),
+	price: z
+		.string()
+		.transform((val) => Number(val))
+		.refine((val) => !Number.isNaN(val), { message: "El precio debe ser un número válido." })
+		.refine((val) => val >= 0, { message: "El precio no puede ser negativo." })
+		.optional(),
+	category: z.enum(productsCategoriesValues, { errorMap: () => ({ message: "Categoria invalida." }) }).optional(),
+	disabled: z
+		.boolean({ invalid_type_error: "Tiene que ser true o false." })
+		.transform((val) => String(val))
+		.optional()
+})
+
+export default { create: productCreateBodySchema, update: productUpdateBodySchema }
