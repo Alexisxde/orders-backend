@@ -7,6 +7,7 @@ import { createServer as createServerHttp } from "node:http"
 import { createServer as createServerHttps } from "node:https"
 import "./config"
 import { FRONT_URL, SSL_CERT, SSL_KEY } from "./config"
+import upload from "./middlewares/multer"
 
 const app = express()
 const options = SSL_KEY && SSL_CERT ? { key: fs.readFileSync(SSL_KEY), cert: fs.readFileSync(SSL_CERT) } : {}
@@ -21,7 +22,8 @@ app.use([
 		allowedHeaders: ["Content-Type"]
 	}),
 	morgan("dev"),
-	cookieParser()
+	cookieParser(),
+	upload.single("file")
 ])
 
 export { app, server }

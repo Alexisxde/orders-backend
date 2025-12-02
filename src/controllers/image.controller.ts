@@ -1,6 +1,6 @@
 import type { UploadApiResponse } from "cloudinary"
 import type { Request, Response } from "express"
-import { getImages, insertImage } from "../models/image.model"
+import { getImages, insertImage, insertOneImage } from "../models/image.model"
 import cloudinary from "../services/cloudinary"
 import type { UserJWT } from "../types/auth"
 
@@ -23,6 +23,22 @@ export async function postImage({ file, user_id }: { file: Express.Multer.File; 
 		const { public_id: _id, secure_url: url }: UploadApiResponse = await cloudinary.uploader.upload(filePath)
 		if (!_id || !url) throw { status: 500, error: "Invalid Cloudinary response." }
 		const image = await insertImage({ _id, url, user_id })
+		return image
+	} catch (_) {
+		throw { status: 500, error: "Error uploading file." }
+	}
+}
+
+export async function postOneImage({ file }: { file: Express.Multer.File }) {
+	const filePath = file.path
+	if (!file) throw { status: 400, error: "Archivo requerido." }
+	else if (!file.mimetype.startsWith("image/")) throw { status: 400, error: "El archivo debe ser una imagen." }
+	if (!filePath) throw { status: 400, error: "No se pudo acceder al archivo" }
+
+	try {
+		const { public_id: _id, secure_url: url }: UploadApiResponse = await cloudinary.uploader.upload(filePath)
+		if (!_id || !url) throw { status: 500, error: "Invalid Cloudinary response." }
+		const image = await insertOneImage({ _id, url })
 		return image
 	} catch (_) {
 		throw { status: 500, error: "Error uploading file." }

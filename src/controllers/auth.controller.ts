@@ -3,19 +3,20 @@ import type { Request, Response } from "express"
 import jwt from "jsonwebtoken"
 import type { z } from "zod"
 import { JWT_SECRET, JWT_SECRET_REFRESHTOKEN, NODE_ENV } from "../config"
-import { createUser, getUserByEmail, UserById } from "../models/user.model"
-import type { userCreateBodySchema, userLoginBodySchema } from "../schemas/auth.schema"
+import UserModel from "../models/user.model"
+import type { userCreateBodySchema, userLoginBodySchema, userUpdateBodySchema } from "../schemas/auth.schema"
 import type { UserJWT } from "../types/auth"
 import type { HttpError } from "../types/error"
+import { postOneImage } from "./image.controller"
 
-export async function registerUser(req: Request, res: Response) {
+export async function register(req: Request, res: Response) {
 	const { name, email, password } = req.body as z.infer<typeof userCreateBodySchema>
 
 	try {
-		const existingUser = await getUserByEmail(email)
+		const existingUser = await UserModel.getByEmail(email)
 		if (existingUser) throw { status: 409, message: "El usuario ya existe. Intentelo de nuevo con otro email." }
 
-		const data = await createUser({ name, email, password })
+		const data = await UserModel.create({ name, email, password })
 		res.status(201).json({ success: true, data, error: null })
 	} catch (e: unknown) {
 		const err = e as HttpError
@@ -23,11 +24,11 @@ export async function registerUser(req: Request, res: Response) {
 	}
 }
 
-export async function loginUser(req: Request, res: Response) {
+export async function login(req: Request, res: Response) {
 	const { email, password } = req.body as z.infer<typeof userLoginBodySchema>
 
 	try {
-		const user = await getUserByEmail(email)
+		const user = await UserModel.getByEmail(email)
 		if (!user) throw { status: 404, message: "Usuario no encontrado. Por favor intentelo de nuevo." }
 
 		const isValid = await bcrypt.compare(password, user.password)
@@ -58,7 +59,7 @@ export async function loginUser(req: Request, res: Response) {
 	}
 }
 
-export async function logoutUser(_: Request, res: Response) {
+export async function logout(_: Request, res: Response) {
 	try {
 		res.clearCookie("token", {
 			httpOnly: true,
@@ -79,15 +80,28 @@ export async function logoutUser(_: Request, res: Response) {
 	}
 }
 
-export async function getCurrentUser(req: Request, res: Response) {
-	const token = req.cookies.token
+export async function user(req: Request, res: Response) {
+	const { _id: user_id } = req.body.user as UserJWT
 	try {
-		if (!token) throw { status: 401, error: "No hay token." }
-		const decoded = jwt.verify(token, JWT_SECRET) as UserJWT
-		const user = await UserById(decoded._id)
+		const user = await UserModel.getById(user_id)
 		if (!user) throw { status: 404, error: "Usuario no encontrado." }
-
 		const { password: _, ...data } = user
+		res.status(200).json({ success: true, data, error: null })
+	} catch (e: unknown) {
+		const err = e as HttpError
+		res.status(err?.status || 500).json({ success: false, error: err?.error || "Internal Server Error" })
+	}
+}
+
+export async function update(req: Request, res: Response) {
+	const { _id: user_id } = req.body.user as UserJWT
+	const { name, email } = req.body as z.infer<typeof userUpdateBodySchema>
+	const file = req.file
+	let avatar: { _id: string; url: string } | null = null
+
+	try {
+		if (file) avatar = await postOneImage({ file })
+		const data = await UserModel.update({ name, email, id_avatar: avatar?._id, user_id })
 		res.status(200).json({ success: true, data, error: null })
 	} catch (e: unknown) {
 		const err = e as HttpError
@@ -116,3 +130,5 @@ export async function refresh(req: Request, res: Response) {
 		res.status(err?.status || 500).json({ success: false, error: err?.error || "Internal Server Error" })
 	}
 }
+
+export default { register, login, user, update, logout, refresh }

@@ -4,7 +4,7 @@ import db from "../db/db"
 import { ImagesTable, UserTable } from "../db/schema"
 import type { UserCreate } from "../types/auth"
 
-export const createUser = async ({ name, email, password }: UserCreate) => {
+export async function createUser({ name, email, password }: UserCreate) {
 	const SALT = 10
 	const _id = crypto.randomUUID()
 
@@ -20,7 +20,7 @@ export const createUser = async ({ name, email, password }: UserCreate) => {
 	}
 }
 
-export const getUserByEmail = async (email: string) => {
+export async function getUserByEmail(email: string) {
 	try {
 		const result = await db
 			.select({
@@ -38,7 +38,7 @@ export const getUserByEmail = async (email: string) => {
 	}
 }
 
-export const UserById = async (_id: string) => {
+export async function UserById(_id: string) {
 	try {
 		const result = await db
 			.select({
@@ -57,3 +57,32 @@ export const UserById = async (_id: string) => {
 		throw { status: 500, error: "No se pudo obtener la información del usuario. Intente nuevamente más tarde." }
 	}
 }
+
+export async function updateUser({
+	name,
+	email,
+	id_avatar,
+	user_id
+}: {
+	name?: string
+	email?: string
+	id_avatar?: string
+	user_id: string
+}) {
+	try {
+		const [result] = await db
+			.update(UserTable)
+			.set({ name, email, id_avatar })
+			.where(eq(UserTable._id, user_id))
+			.returning({ _id: UserTable._id })
+		const { password: _, ...user } = await UserById(result._id)
+		return user
+	} catch (_) {
+		throw {
+			status: 500,
+			error: "No se pudo actualizar la información en la base de datos. Intente nuevamente más tarde."
+		}
+	}
+}
+
+export default { create: createUser, getByEmail: getUserByEmail, getById: UserById, update: updateUser }

@@ -24,3 +24,8 @@ export const userLoginBodySchema = z.object({
 		invalid_type_error: "La contraseña debe ser un texto."
 	})
 })
+
+export const userUpdateBodySchema = z.object({
+	name: z.string().optional(),
+	email: z.string().email({ message: "Debe ser un email válido." }).optional()
+})
