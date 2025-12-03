@@ -2,7 +2,6 @@ import "dotenv/config"
 import { API_URL, PORT } from "./config"
 import { verifySession } from "./middlewares/verify-session"
 import authRouter from "./routes/auth.route"
-import imageRouter from "./routes/image.route"
 import orderRouter from "./routes/order.route"
 import productRouter from "./routes/product.route"
 import reportRouter from "./routes/report.route"
@@ -14,7 +13,6 @@ app.get("/", (_, res) => {
 
 app.use("/api/auth", authRouter)
 app.use("/api/products", verifySession, productRouter)
-app.use("/api/images", verifySession, imageRouter)
 app.use("/api/orders", verifySession, orderRouter)
 app.use("/api/reports", verifySession, reportRouter)
 
