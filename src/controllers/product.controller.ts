@@ -14,7 +14,7 @@ export async function createProduct(req: Request, res: Response) {
 	try {
 		if (!file) throw { status: 400, error: [{ field: "file", message: "La imagen del producto es obligatorio." }] }
 		const { _id: image_id } = await ImageController.insert({ file, user_id })
-		const data = await ProductModel.insert({
+		const data = await ProductModel.create({
 			name,
 			unit_price: price.toString(),
 			category,
@@ -60,12 +60,6 @@ export async function updateProduct(req: Request, res: Response) {
 	const { name, category, price, description, disabled } = req.body as z.infer<typeof ProductShema.update>
 
 	try {
-		if (!name && !category && !price && !description && !disabled)
-			throw {
-				status: 400,
-				error: "Para actualizar se necesitan algunos de estos campos. (name, category, price, description, disabled)"
-			}
-
 		const data = await ProductModel.update({
 			_id: id,
 			name,

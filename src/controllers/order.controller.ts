@@ -10,7 +10,7 @@ export async function createOrder(req: Request, res: Response) {
 	const { name, payment_method, phone, orders } = req.body as z.infer<typeof orderCreateBodySchema>
 
 	try {
-		const data = await OrderModel.insert({ name, payment_method, phone, user_id, orders })
+		const data = await OrderModel.create({ name, payment_method, phone, user_id, orders })
 		res.status(201).json({ success: true, data, error: null })
 	} catch (e: unknown) {
 		const err = e as HttpError
