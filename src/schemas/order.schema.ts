@@ -59,3 +59,5 @@ export const orderSelectQuerySchema = z
 			path: ["to"]
 		}
 	)
+
+export default { create: orderCreateBodySchema, select: orderSelectQuerySchema }
