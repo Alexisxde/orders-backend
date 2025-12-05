@@ -7,7 +7,8 @@ const router = Router()
 
 router.get("/", schemaQuerysValidator(OrderSchema.select), OrderController.get)
 router.post("/new", schemaBodyValidator(OrderSchema.create), OrderController.create)
-// router.put("/:id", schemaBodyValidator(orderUpdateBodySchema), OrderController.update)
+router.get("/:id", OrderController.getById)
+router.put("/:id", schemaBodyValidator(OrderSchema.update), OrderController.update)
 // router.delete("/:id", OrderController.delete)
 
 export default router

@@ -13,6 +13,7 @@ export type CreateOrderDetails = Required<Pick<OrderDetails, "product_id" | "qua
 export type CreateOrder = Required<Pick<Order, "name" | "phone" | "payment_method" | "user_id">> & {
 	orders: Omit<CreateOrderDetails, "price">[]
 }
+export type UpdateOrderDetails = Partial<Pick<OrderDetails, "product_id" | "quantity" | "observation">>
 export type SelectOrders = Required<Pick<Order, "user_id">> & {
 	page: string
 	per_page: string

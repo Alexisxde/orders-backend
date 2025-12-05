@@ -2,8 +2,7 @@ import { and, asc, count, desc, eq, gte, lte, sql } from "drizzle-orm"
 import db from "../db/db"
 import { OrdersDetailsTable, OrdersTable, ProductsTable } from "../db/schema"
 import { getProduct } from "../models/product.model"
-import type { CreateOrder, CreateOrderDetails, OrderStatus, SelectOrders } from "../types/order"
-import { orderStatusValues } from "../types/order"
+import type { CreateOrder, CreateOrderDetails, OrderPaymentMethod, OrderStatus, SelectOrders } from "../types/order"
 
 export async function createOrder(order: CreateOrder) {
 	const _id = crypto.randomUUID()
@@ -54,9 +53,67 @@ export async function createOrder(order: CreateOrder) {
 	return { result, details: orderDetailsData }
 }
 
+export async function getOrderAndDetails({ _id, user_id }: { _id: string; user_id: string }) {
+	const result = await db
+		.select({
+			_id: OrdersTable._id,
+			name: OrdersTable.name,
+			phone: OrdersTable.phone,
+			payment_method: OrdersTable.payment_method,
+			total: OrdersTable.total,
+			status: OrdersTable.status,
+			created_at: OrdersTable.created_at,
+			detail_id: OrdersDetailsTable._id,
+			quantity: OrdersDetailsTable.quantity,
+			price: OrdersDetailsTable.price,
+			observation: OrdersDetailsTable.observation,
+			product_id: ProductsTable._id,
+			product_name: ProductsTable.name,
+			product_category: ProductsTable.category,
+			product_description: ProductsTable.description
+		})
+		.from(OrdersTable)
+		.leftJoin(OrdersDetailsTable, eq(OrdersTable._id, OrdersDetailsTable.order_id))
+		.leftJoin(ProductsTable, eq(OrdersDetailsTable.product_id, ProductsTable._id))
+		.where(and(eq(OrdersTable._id, _id), eq(OrdersTable.user_id, user_id)))
+
+	if (!result || result.length === 0) throw { status: 404, error: "No se encontró ese pedido." }
+
+	const order = {
+		_id: result[0]._id,
+		name: result[0].name,
+		phone: result[0].phone,
+		payment_method: result[0].payment_method,
+		total: result[0].total,
+		status: result[0].status,
+		created_at: result[0].created_at,
+		details: result.map((row) => ({
+			quantity: row.quantity,
+			price: row.price,
+			observation: row.observation,
+			product: {
+				_id: row.product_id,
+				name: row.product_name,
+				category: row.product_category,
+				description: row.product_description
+			}
+		}))
+	}
+
+	return order
+}
+
 export async function selectOrders({ user_id, ...options }: SelectOrders) {
-	const { page = "1", per_page = "15", status, from, to, sort_by = "created_at", sort_order = "desc" } = options
-	const conditions = [eq(OrdersTable.user_id, user_id)]
+	const {
+		page = "1",
+		per_page = "15",
+		status = "delivered",
+		from,
+		to,
+		sort_by = "created_at",
+		sort_order = "desc"
+	} = options
+	const conditions = [eq(OrdersTable.user_id, user_id), eq(OrdersTable.status, status)]
 	const page_number = parseInt(page)
 	const limit = parseInt(per_page)
 	const offset = (page_number - 1) * limit
@@ -66,7 +123,6 @@ export async function selectOrders({ user_id, ...options }: SelectOrders) {
 	if (!Number.isFinite(limit) || limit <= 0)
 		throw { status: 400, error: [{ param: "limit", message: "Tiene que ser un número." }] }
 
-	if (status && orderStatusValues.includes(status)) conditions.push(eq(OrdersTable.status, status))
 	if (from && to) {
 		const targetFromDate = new Date(from)
 		const startOfDay = new Date(targetFromDate)
@@ -234,4 +290,50 @@ export async function selectOrdersToMonth({
 	return { month, total: result?.total ?? 0, quantity: result?.quantity ?? 0, year }
 }
 
-export default { select: selectOrders, create: createOrder, update: null }
+export async function updateOrder({
+	_id,
+	user_id,
+	...options
+}: {
+	_id: string
+	name?: string
+	status?: OrderStatus
+	payment_method?: OrderPaymentMethod
+	phone?: string
+	user_id: string
+}) {
+	const { name, phone, status, payment_method } = options
+
+	if (!name && !phone && !status && !payment_method)
+		throw {
+			status: 400,
+			error: "Para actualizar se necesitan algunos de estos campos. (name, phone, status, payment_method)"
+		}
+
+	const orderExists = await getOrderAndDetails({ _id, user_id })
+	if (!orderExists) throw { status: 404, error: "El pedido no pudo ser encontrado." }
+
+	const [result] = await db
+		.update(OrdersTable)
+		.set({ name, phone, payment_method, status })
+		.where(and(eq(OrdersTable._id, _id), eq(OrdersTable.user_id, user_id)))
+		.returning({
+			_id: OrdersTable._id,
+			name: OrdersTable.name,
+			phone: OrdersTable.phone,
+			payment_method: OrdersTable.payment_method,
+			total: OrdersTable.total,
+			created_at: OrdersTable.created_at,
+			status: OrdersTable.status
+		})
+
+	return result
+}
+
+export default {
+	select: selectOrders,
+	create: createOrder,
+	getOrderAndDetails,
+	selectOne: getOrderAndDetails,
+	update: updateOrder
+}
