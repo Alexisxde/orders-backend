@@ -1,5 +1,5 @@
 import prisma from "../../modules/prisma"
-import type { CreateHabit, CreateHabitLog } from "./habit.type"
+import type { CreateHabit, CreateHabitLog, UpdateHabit } from "./habit.type"
 
 async function create(userId: string, data: CreateHabit) {
 	const { title, description } = data
@@ -37,6 +37,7 @@ async function getById(userId: string, habitId: string, date?: string) {
 			id: true,
 			title: true,
 			description: true,
+			active: true,
 			createdAt: true,
 			updatedAt: true,
 			logs: {
@@ -51,14 +52,14 @@ async function getById(userId: string, habitId: string, date?: string) {
 	return habit
 }
 
-async function update(userId: string, habitId: string, data: Partial<CreateHabit>) {
-	const { title, description } = data
+async function update(userId: string, habitId: string, data: UpdateHabit) {
+	const { title, description, active } = data
 
 	await getById(userId, habitId)
 	const habit = await prisma.habit.update({
 		where: { id: habitId, userId },
-		data: { title, description, updatedAt: new Date() },
-		select: { id: true, title: true, description: true, createdAt: true, updatedAt: true }
+		data: { title, description, active, updatedAt: new Date() },
+		select: { id: true, title: true, description: true, active: true, createdAt: true, updatedAt: true }
 	})
 
 	return habit
@@ -97,12 +98,12 @@ async function createLogById(userId: string, habitId: string, data: CreateHabitL
 
 	if (lastLog && lastLog.completed === completed) return lastLog
 
-	const habit = await prisma.habitLog.create({
+	const habitLog = await prisma.habitLog.create({
 		data: { completed, habitId, date: logDate },
 		select: { id: true, completed: true, date: true }
 	})
 
-	return habit
+	return habitLog
 }
 
 async function getTop(userId: string) {

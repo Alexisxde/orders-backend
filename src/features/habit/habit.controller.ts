@@ -42,10 +42,10 @@ async function getById(req: Request, res: Response, next: NextFunction) {
 async function update(req: Request, res: Response, next: NextFunction) {
 	const { id: userId } = req.body.user as UserJWT
 	const { id: habitId } = req.params as { id: string }
-	const { title, description } = req.body as UpdateHabit
+	const { title, description, active } = req.body as UpdateHabit
 
 	try {
-		const data = await HabitService.update(userId, habitId, { title, description })
+		const data = await HabitService.update(userId, habitId, { title, description, active })
 		res.status(200).json({ success: true, data, error: null })
 	} catch (err) {
 		next(err)

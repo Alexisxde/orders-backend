@@ -7,7 +7,11 @@ const createHabitSchema = z.object({
 	description: z.string({ invalid_type_error: "La descripción debe ser un texto." }).optional()
 })
 
-const updateHabitSchema = createHabitSchema.partial()
+const updateHabitSchema = createHabitSchema.partial().extend({
+	active: z.boolean({
+		invalid_type_error: "El estado de activo debe ser un booleano."
+	}).optional()
+}) 
 
 const createHabitLogSchema = z.object({
 	completed: z.boolean({
