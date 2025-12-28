@@ -7,8 +7,6 @@ const envSchema = z.object({
 	FRONT_URL: z.string().default("http://localhost:3001"),
 	NODE_ENV: z.string().default("production"),
 	API_URL: z.string().default("http://localhost"),
-	SSL_KEY: z.string().optional(),
-	SSL_CERT: z.string().optional(),
 	JWT_SECRET_REFRESHTOKEN: z.string(),
 	JWT_SECRET: z.string(),
 	CLOUDINARY_CLOUD_NAME: z.string(),
@@ -41,7 +39,5 @@ export const {
 	JWT_SECRET,
 	CLOUDINARY_CLOUD_NAME,
 	CLOUDINARY_API_KEY,
-	CLOUDINARY_API_SECRET,
-	SSL_KEY,
-	SSL_CERT
+	CLOUDINARY_API_SECRET
 } = data

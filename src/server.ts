@@ -2,28 +2,25 @@ import cookieParser from "cookie-parser"
 import cors from "cors"
 import express, { json } from "express"
 import morgan from "morgan"
-import fs from "node:fs"
-import { createServer as createServerHttp } from "node:http"
-import { createServer as createServerHttps } from "node:https"
+import { createServer } from "node:http"
 import "./config"
-import { FRONT_URL, SSL_CERT, SSL_KEY } from "./config"
-import upload from "./middlewares/multer"
+import { FRONT_URL } from "./config"
+import Multer from "./middlewares/multer.middleware"
 
 const app = express()
-const options = SSL_KEY && SSL_CERT ? { key: fs.readFileSync(SSL_KEY), cert: fs.readFileSync(SSL_CERT) } : {}
-const server = SSL_KEY && SSL_CERT ? createServerHttps(options, app) : createServerHttp(app)
+const server = createServer(app)
 
-app.use([
-	json(),
+app.use(json())
+app.use(
 	cors({
 		origin: [FRONT_URL, "http://localhost:3000"],
 		credentials: true,
-		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+		methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
 		allowedHeaders: ["Content-Type"]
-	}),
-	morgan("dev"),
-	cookieParser(),
-	upload.single("file")
-])
+	})
+)
+app.use(morgan("dev"))
+app.use(cookieParser())
+app.use(Multer.single("file"))
 
 export { app, server }
