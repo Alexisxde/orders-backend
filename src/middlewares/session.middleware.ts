@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express"
 import jwt from "jsonwebtoken"
 import { JWT_SECRET, JWT_SECRET_REFRESHTOKEN, NODE_ENV } from "../config"
-import type { UserJWT } from "../types/auth"
+import type { UserJWT } from "../features/auth/auth.type"
 
 export const verifySession = (req: Request, res: Response, next: NextFunction) => {
 	const token = req.cookies.token

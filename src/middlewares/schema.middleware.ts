@@ -30,3 +30,5 @@ export const schemaQuerysValidator =
 		}
 		next()
 	}
+
+export default { body: schemaBodyValidator, query: schemaQuerysValidator }
