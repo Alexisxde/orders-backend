@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  postgres:
+    restart: unless-stopped
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=ordersdb
+    ports:
+     - 5434:5432
