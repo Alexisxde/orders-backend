@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt"
-import ImageService from "../../features/image/image.service"
-import prisma from "../../modules/prisma"
+import prisma from "../../services/prisma"
+import ImageService from "../image/image.service"
 import type { RegisterUser, UpdateUser } from "./auth.schema"
 import type { User } from "./auth.type"
 

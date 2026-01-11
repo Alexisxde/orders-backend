@@ -12,7 +12,6 @@ model User {
   password  String
   name      String
   role      String   @default("user")
-  habits    Habit[]
   avatarId  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -29,24 +28,4 @@ model Avatar {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Habit {
-  id          String     @id @default(uuid())
-  title       String
-  description String?
-  active      Boolean    @default(true)
-  logs        HabitLog[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  userId      String
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model HabitLog {
-  id        String   @id @default(uuid())
-  habitId   String
-  date      DateTime @default(now())
-  completed Boolean  @default(false)
-  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
 }
