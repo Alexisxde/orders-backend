@@ -1,6 +1,7 @@
 /node_modules
 /build
 migrations
+generated
 pnpm-lock.yaml
 .env
 *.db

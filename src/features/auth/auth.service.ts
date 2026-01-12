@@ -2,7 +2,7 @@ import bcrypt from "bcrypt"
 import prisma from "../../services/prisma"
 import ImageService from "../image/image.service"
 import type { RegisterUser, UpdateUser } from "./auth.schema"
-import type { User } from "./auth.type"
+import type { User } from "./auth.types"
 
 async function create({ name, email, password }: RegisterUser) {
 	const SALT = 10

@@ -2,9 +2,6 @@ import "dotenv/config"
 import prisma from "../src/services/prisma"
 
 async function main() {
-	/* =======================
-    USER
-  ======================= */
 	const user = await prisma.user.upsert({
 		where: { email: "user@user.com" },
 		update: {},
@@ -17,10 +14,7 @@ async function main() {
 	// biome-ignore lint/suspicious/noConsole: Permitido para migrar usuario.
 	console.log("✅ Usuario creado")
 
-	/* =======================
-    AVATAR
-  ======================= */
-	const avatar = await prisma.avatar.upsert({
+	const avatar = await prisma.image.upsert({
 		where: { userId: user.id },
 		update: {},
 		create: {

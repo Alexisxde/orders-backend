@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken"
 import { JWT_SECRET, JWT_SECRET_REFRESHTOKEN, NODE_ENV } from "../../config"
 import type { LoginUser, RegisterUser, UpdateUser } from "./auth.schema"
 import AuthService from "./auth.service"
-import type { UserJWT } from "./auth.type"
+import type { UserJWT } from "./auth.types"
 
 export async function register(req: Request, res: Response, next: NextFunction) {
 	const { name, email, password } = req.body as RegisterUser

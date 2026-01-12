@@ -8,6 +8,8 @@
 		"dev": "ts-node-dev src/index.ts",
 		"db:generate": "prisma generate",
 		"db:migrate": "prisma migrate dev --name",
+		"db:studio": "prisma studio",
+		"db:seed": "ts-node ./prisma/seed.ts",
 		"format": "biome format --write",
 		"check": "biome check",
 		"lint": "biome check --write"
@@ -18,7 +20,6 @@
 	"description": "",
 	"packageManager": "pnpm@10.19.0",
 	"dependencies": {
-		"@prisma/adapter-libsql": "^7.2.0",
 		"@prisma/adapter-pg": "^7.2.0",
 		"@prisma/client": "^7.2.0",
 		"bcrypt": "6.0.0",
