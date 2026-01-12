@@ -2,45 +2,36 @@ name: Lint y Format Check
 
 on:
   push:
-    branches: [ "main", "dev" ]
+    branches: [ "main", "dev", "development" ]
   
   pull_request:
-    branches: [ "main", "dev" ]
+    branches: [ "main", "dev", "development" ]
 
-# Cancela ejecuciones anteriores en la misma rama/PR para ahorrar recursos
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  lint-and-format:
-    name: Checkeo de Lint y Formato
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      # Obtener el código del repositorio
-      - name: Checkout código
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # Configurar pnpm
-      - name: Configurar pnpm
-        uses: pnpm/action-setup@v3
-
-      # Configurar Node.js 20 y la caché de pnpm
-      - name: Configurar Node.js 20
+      - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: "pnpm"
+          node-version: '20'
+          cache: 'npm'
 
-      # Instalar dependencias
-      - name: Instalar dependencias
-        run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: npm ci
 
-      # Ejecutar Lint
-      - name: Ejecutar Lint
-        run: pnpm lint
+      - name: Lint
+        run: npm run check
 
-      # Verificar formato
-      - name: Verificar formato
-        run: pnpm format
+      - name: Check formatting
+        run: npm run format
+
+      - name: Build
+        run: npm run build
