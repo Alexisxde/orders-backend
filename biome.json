@@ -6,6 +6,7 @@
 		"useIgnoreFile": false
 	},
 	"files": {
+		"includes": ["src/**/*", "biome.json"],
 		"ignoreUnknown": false
 	},
 	"formatter": {

@@ -1,20 +1,23 @@
 {
-	"compilerOptions": {
-		"target": "ES2016",
-		"baseUrl": "./src",
-		"module": "CommonJS",
-		"moduleResolution": "node",
-		"outDir": "./build",
-		"rootDir": "./",
-		"sourceMap": true,
-		"esModuleInterop": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"strict": true,
-		"forceConsistentCasingInFileNames": true,
-		"noFallthroughCasesInSwitch": true,
-		"skipLibCheck": true
-	},
-	"include": ["src/**/*"],
-	"exclude": ["node_modules", "build"]
+  "compilerOptions": {
+    "target": "ES2016",
+    "baseUrl": "./src",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "outDir": "./build",
+    "rootDir": "./",
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@/*": ["*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "build"]
 }

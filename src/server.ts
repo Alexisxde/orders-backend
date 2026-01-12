@@ -5,7 +5,7 @@ import morgan from "morgan"
 import { createServer } from "node:http"
 import "./config"
 import { FRONT_URL } from "./config"
-import Multer from "./middlewares/multer.middleware"
+import MulterMiddleware from "./middlewares/multer.middleware"
 
 const app = express()
 const server = createServer(app)
@@ -21,6 +21,6 @@ app.use(
 )
 app.use(morgan("dev"))
 app.use(cookieParser())
-app.use(Multer.single("file"))
+app.use(MulterMiddleware.single("file"))
 
 export { app, server }
